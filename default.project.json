@@ -24,7 +24,9 @@
     },
 
     "ReplicatedFirst": {
-      "$path": "src/replicatedFirst"
+      "First": {
+        "$path": "src/client"
+      }
     }
   }
 }

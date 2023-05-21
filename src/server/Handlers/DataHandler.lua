@@ -33,7 +33,7 @@ local function PlayerAdded(player)
     if player:IsDescendantOf(Players) then
         DataHandler.Profiles[player] = Profile
         DataHandler.OnLoadData:Fire(player, Profile)
-        return;
+        return
     end
 
     Profile:Release()
