@@ -8,7 +8,7 @@ Field.DefaultSettings = {
     CropType = "Wheat",
     CropRespawnTime = NumberRange.new(10,15),
     CropDropAmount = NumberRange.new(1,3),
-    CropSize = Vector2.new(3,3),
+    CropOffset = Vector2.new(0,0),
     MaxCrops = nil
 }
 Field.InstanceToWrap = {}
@@ -22,7 +22,7 @@ function ConvertRange(Value)
 end
 
 function GetFullDivided(Number, DivideBy)
-    return Number / DivideBy - Number % DivideBy
+    return (Number / DivideBy) - math.fmod(Number, DivideBy)
 end
 
 function Field.getSettings()
@@ -47,6 +47,7 @@ function Field:Constructor(FieldInstance, Settings)
 
     self.Splitted = not FieldInstance:IsA("BasePart")
     self.Instance = FieldInstance
+    self.CropModel = Assets.Crops:FindFirstChild(self.CropType)
 end
 
 function Field:NewCropExample(Position)
@@ -58,10 +59,9 @@ function Field:NewCropExample(Position)
         return
     end
 
-    local CropModel = Assets.Crops:FindFirstChild(self.CropType)
-    local EndPivot = CFrame.new(Position + Vector3.new(0,CropModel.Size.Y/2,0))
+    local EndPivot = CFrame.new(Position + Vector3.new(0,self.CropModel.Size.Y/2,0))
 
-    local ClonedModel = CropModel:Clone()
+    local ClonedModel = self.CropModel:Clone()
     ClonedModel.CFrame = EndPivot
     ClonedModel.Parent = self.Instance.Crops
 
@@ -80,18 +80,18 @@ function Field:Initialize()
     self.Initialized = true
 
     if not self.Splitted then
-        local Start = self.Instance.Position - self.Instance.Size/2
-        Start = Vector3.new(Start.X, self.Instance.Position.Y + self.Instance.Size.Y/2, Start.Z)
+        local FieldPosition, FieldSize = self.Instance.Position, self.Instance.Size
+        local Start = FieldPosition - Vector3.new(FieldSize.X/2,0,FieldSize.Z/2)
+        local CropSize = self.CropModel.Size
 
-        local XIterations = GetFullDivided(self.Instance.Size.X, self.CropSize.X)
-        local ZIterations = GetFullDivided(self.Instance.Size.Z, self.CropSize.Y)
+        local XIterations = GetFullDivided(FieldSize.X, CropSize.X)
+        local ZIterations = GetFullDivided(FieldSize.Z, CropSize.Z)
 
-        for i = 1, XIterations do
-            local CurrentPos = Start + Vector3.new(self.CropSize.X * i,0,0)
-
-            for x = 1, ZIterations do
-                local CropPosition = CurrentPos + Vector3.new(0,0,self.CropSize.Y * x)
-                self:NewCropExample(CropPosition)
+        for x = 1, XIterations do
+            local CurrentX = Start + Vector3.new(CropSize.X * x + self.CropOffset.X * x, 0, 0)
+            for z = 1, ZIterations do
+                local Current = CurrentX + Vector3.new(0, 0, CropSize.Z * z + self.CropOffset.Z * z)
+                self:NewCropExample(Current)
             end
         end
     end
