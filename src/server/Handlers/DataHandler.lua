@@ -9,6 +9,7 @@ local PlayerWrap = require(ServerLibs.Classes.PlayerWrap)
 local Signal = require(ReplicatedStorage.Shared.Libraries.Signal)
 
 local DataHandler = {}
+DataHandler.AutoDataPushDelay = 30
 
 DataHandler.OnLoadData = Signal.new()
 

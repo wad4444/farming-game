@@ -55,4 +55,21 @@ function PlayerWrap:SyncWithProfile()
     Profile.Backpacks = ConvertFromClass("Backpacks")
 end
 
+function PlayerWrap:AutoDataPushAsync(Delay)
+    self.StopPushing = false
+
+    local Coroutine = coroutine.create(function()
+        while not self.StopPushing do
+            task.wait(Delay)
+            self:SyncWithProfile()
+        end
+    end)
+
+    coroutine.wrap(Coroutine)
+end
+
+function PlayerWrap:StopPushing()
+    self.StopPushing = true
+end
+
 return PlayerWrap
