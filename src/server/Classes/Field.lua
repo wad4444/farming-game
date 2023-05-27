@@ -1,3 +1,4 @@
+local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Assets = ReplicatedStorage.Assets
 
@@ -8,7 +9,7 @@ Field.DefaultSettings = {
     CropType = "Wheat",
     CropRespawnTime = NumberRange.new(10,15),
     CropDropAmount = NumberRange.new(1,3),
-    CropOffset = Vector2.new(0,0),
+    CropOffset = Vector3.new(0,0,0),
     MaxCrops = nil
 }
 Field.InstanceToWrap = {}
@@ -25,11 +26,11 @@ function GetFullDivided(Number, DivideBy)
     return (Number / DivideBy) - math.fmod(Number, DivideBy)
 end
 
-function Field.getSettings()
+function Field.GetSettings()
     return table.clone(Field.DefaultSettings)
 end
 
-function Field.get(Instance)
+function Field.Get(Instance)
     return Field.InstanceToWrap[Instance]
 end
 
@@ -65,6 +66,8 @@ function Field:NewCropExample(Position)
     ClonedModel.CFrame = EndPivot
     ClonedModel.Parent = self.Instance.Crops
 
+    CollectionService:AddTag(ClonedModel, "Crop")
+
     table.insert(self.Crops, ClonedModel)
 end
 
@@ -84,14 +87,9 @@ function Field:Initialize()
         local Start = FieldPosition - Vector3.new(FieldSize.X/2,0,FieldSize.Z/2)
         local CropSize = self.CropModel.Size
 
-        local XIterations = GetFullDivided(FieldSize.X, CropSize.X)
-        local ZIterations = GetFullDivided(FieldSize.Z, CropSize.Z)
-
-        for x = 1, XIterations do
-            local CurrentX = Start + Vector3.new(CropSize.X * x + self.CropOffset.X * x, 0, 0)
-            for z = 1, ZIterations do
-                local Current = CurrentX + Vector3.new(0, 0, CropSize.Z * z + self.CropOffset.Z * z)
-                self:NewCropExample(Current)
+        for x = 0, FieldSize.X, CropSize.X + self.CropOffset.X do
+            for z = 0, FieldSize.Z, CropSize.Z + self.CropOffset.Z do
+                self:NewCropExample(Start + Vector3.new(x,0,z))
             end
         end
     end

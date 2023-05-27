@@ -5,6 +5,10 @@ local ServerModules = ServerScriptService.Server
 local Classes = {}
 
 for i,v in pairs(ServerModules.Classes:GetChildren()) do
+    if not v:IsA("ModuleScript") then
+        continue
+    end
+
     Classes[v.Name] = require(v)
 end
 
@@ -14,7 +18,7 @@ local Switch = {
     Field = function(FieldInstance)
         local Field = Classes.Field
 
-        local Settings = Field.getSettings()
+        local Settings = Field.GetSettings()
         for i,v in pairs(Settings) do
             Settings[i] = FieldInstance:GetAttribute(i) or v
         end

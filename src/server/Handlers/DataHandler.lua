@@ -2,14 +2,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local Players = game:GetService("Players")
 
+local ServerLibs = ServerScriptService.Server
+local DataStructure = require(ServerLibs.Structures.PlayerData)
+local PlayerWrap = require(ServerLibs.Classes.PlayerWrap)
+
 local Signal = require(ReplicatedStorage.Shared.Libraries.Signal)
-local DataStructure = require(ServerScriptService.Server.Structures.PlayerData)
 
 local DataHandler = {}
-DataHandler.Profiles = {}
 
 DataHandler.OnLoadData = Signal.new()
-DataHandler.OnSaveData = Signal.new()
 
 local ProfileService = require(ServerScriptService.Server.Libraries.ProfileService)
 local ProfileStore = ProfileService.GetProfileStore("PlayerDataStore", DataStructure)
@@ -26,12 +27,10 @@ local function PlayerAdded(player)
     Profile:Reconcile()
     
     Profile:ListenToRelease(function()
-        DataHandler.Profiles[player] = nil
         player:Kick()
     end)
 
     if player:IsDescendantOf(Players) then
-        DataHandler.Profiles[player] = Profile
         DataHandler.OnLoadData:Fire(player, Profile)
         return
     end
@@ -40,14 +39,14 @@ local function PlayerAdded(player)
 end
 
 local function SaveData(player: Player)
-    local Profile = DataHandler.Profiles[player]
+    local Wrap = PlayerWrap.get(player)
 
-    if not Profile then
+    if not Wrap then
         return
     end
 
-    DataHandler.OnSaveData:Fire(player, Profile)
-    task.wait()
+    local Profile = Wrap.Profile
+
     Profile:Release()
 end
 
