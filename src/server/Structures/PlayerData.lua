@@ -5,5 +5,10 @@ return {
             Upgrades = {}
         }
     },
-    Backpacks = {"Backpack1"}
+    Backpacks = {
+        {
+            CLASS_NAME = "Backpack1",
+            Upgrades = {}
+        }
+    }
 }

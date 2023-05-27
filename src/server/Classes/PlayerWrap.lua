@@ -24,7 +24,7 @@ function PlayerWrap:Constructor(Instance, Profile)
     local function ConvertToClass(FieldName)
         self[FieldName] = {}
 
-        for i,v in pairs(Profile[FieldName]) do
+        for i,v in pairs(Profile.Data[FieldName] or {}) do
             if not v.CLASS_NAME then
                 continue
             end
@@ -41,8 +41,26 @@ function PlayerWrap:Constructor(Instance, Profile)
     self.PurchaseHandler = PurchaseHandler.new(self)
 end
 
-function PlayerWrap:SyncWithProfile()
+function PlayerWrap:Initialize()
     local Profile = self.Profile
+
+    local function InitializeEquipped(Field, ListName)
+        local Index = Profile.Data[Field]
+        local IsIndexValid = self[ListName] <= Index
+
+        if not Index or not IsIndexValid then
+            return 0
+        end
+
+        self[ListName][Index]:Initialize()
+    end
+
+    InitializeEquipped("EquippedTool", "Tools")
+    InitializeEquipped("EquippedBackpack", "Backpacks")
+end
+
+function PlayerWrap:SyncWithProfile()
+    local ProfileData = self.Profile.Data
 
     local function ConvertFromClass(FieldName)
         local Table = {}
@@ -51,21 +69,21 @@ function PlayerWrap:SyncWithProfile()
         end
     end
 
-    Profile.Tools = ConvertFromClass("Tools")
-    Profile.Backpacks = ConvertFromClass("Backpacks")
+    ProfileData.Tools = ConvertFromClass("Tools")
+    ProfileData.Backpacks = ConvertFromClass("Backpacks")
 end
 
 function PlayerWrap:AutoDataPushAsync(Delay)
     self.StopPushing = false
 
-    local Coroutine = coroutine.create(function()
+    local Coroutine = coroutine.wrap(function()
         while not self.StopPushing do
             task.wait(Delay)
             self:SyncWithProfile()
         end
     end)
 
-    coroutine.wrap(Coroutine)
+    Coroutine()
 end
 
 function PlayerWrap:StopPushing()

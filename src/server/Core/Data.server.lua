@@ -9,6 +9,7 @@ local PlayerWrap = require(Classes.PlayerWrap)
 
 DataHandler.OnLoadData:Connect(function(Player, Profile)
     local NewWrap = PlayerWrap.new(Player, Profile)
+    NewWrap:Initialize()
     NewWrap:AutoDataPushAsync(DataHandler.AutoDataPushDelay)
 end)
 

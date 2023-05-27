@@ -38,7 +38,11 @@ function Backpack:Initialize()
     local Character = self.Player.Character or self.Player.CharacterAdded:Wait()
 
     local NewPack = OriginalModel:Clone()
-    NewPack.Parent = Backpack
+    NewPack.Parent = Character
+
+    local Motor = NewPack:FindFirstChildOfClass("Motor6D")
+    Motor.Part1 = Character.PrimaryPart
+    Motor.Enabled = true
 
     self.PackInstance = NewPack
 end
