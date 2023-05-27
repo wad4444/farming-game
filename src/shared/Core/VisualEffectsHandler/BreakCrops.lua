@@ -5,6 +5,8 @@ local TweenService = game:GetService("TweenService")
 local Assets = ReplicatedStorage:WaitForChild("Assets")
 local VFXPool = Assets.VFXPool
 
+local Trashcan = game.Workspace.Trashcan
+
 local VFXAssets = VFXPool.BreakCrops
 local Lifetime = 2
 
@@ -14,7 +16,9 @@ return function(Crops)
     local ClonedCrops = {}
     
     for i,v in pairs(Crops) do
-        table.insert(ClonedCrops,v:Clone())
+        local Clone = v:Clone()
+        Clone.Parent = Trashcan
+        table.insert(ClonedCrops,Clone)
     end
 
     local DebrisPool = {}
@@ -24,22 +28,24 @@ return function(Crops)
         local LeafAttachment = Instance.new("Attachment", Crop)
         LeafAttachment.CFrame = AttachmentCFrame
 
-        do
-            local ClonedLeaf = VFXAssets.Leaf:Clone()
-            ClonedLeaf.Parent = LeafAttachment
-    
-            local ClonedWheat = VFXAssets.Wheat:Clone()
-            ClonedWheat.Parent = Crop
+        local ClonedEmitters = {}
 
-            Debris:AddItem(ClonedLeaf, Lifetime)
-            Debris:AddItem(ClonedWheat, Lifetime)
+        for i,v in pairs(VFXAssets:GetChildren()) do
+            ClonedEmitters[v.Name] = v:Clone()
         end
 
-        local Bottom = Crop.CFrame - Vector3.new(0,Crop.Size.Y/2,0)
-        local EndCFrame = (Bottom + Bottom.LookVector * Crop.Size.Y/2) * CFrame.Angles(0,math.rad(90),0)
+        Emitters = ClonedEmitters
+        ClonedEmitters.Leaf.Parent = LeafAttachment
 
-        local Tween = TweenService:Create(Crop, TweenInfo.new(.8), {
-            CFrame = EndCFrame
+        local IsReversed = math.random(0,1) == 0 and true or false
+
+        local Bottom = Crop.CFrame - Vector3.new(0,Crop.Size.Y/2,0)
+        local EndCFrame = (Bottom + (IsReversed and Bottom.LookVector or Bottom.RightVector) * Crop.Size.Y/2) * 
+        (IsReversed and CFrame.Angles(0,0,math.rad(90)) or CFrame.Angles(math.rad(90),0,0))
+
+        local Tween = TweenService:Create(Crop, TweenInfo.new(.4), {
+            CFrame = EndCFrame,
+            Transparency = 1
         })
         Tween:Play()
 
@@ -48,5 +54,6 @@ return function(Crops)
 
     for i,v in pairs(Emitters) do
         v:Emit(v:GetAttribute("EmitCount") or 0)
+        Debris:AddItem(v,Lifetime)
     end
 end

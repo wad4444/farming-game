@@ -36,13 +36,11 @@ end
 function Backpack:Initialize()
     local OriginalModel = PacksPool:FindFirstChild(self.Settings.Type)
     local Character = self.Player.Character or self.Player.CharacterAdded:Wait()
+    local Humanoid = Character:WaitForChild("Humanoid")
 
     local NewPack = OriginalModel:Clone()
     NewPack.Parent = Character
-
-    local Motor = NewPack:FindFirstChildOfClass("Motor6D")
-    Motor.Part1 = Character.PrimaryPart
-    Motor.Enabled = true
+    Humanoid:AddAccessory(NewPack)
 
     self.PackInstance = NewPack
 end

@@ -1,6 +1,9 @@
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+
 local Assets = ReplicatedStorage.Assets
+local Remotes = ReplicatedStorage.Remotes
 
 local Field = {}
 Field.__index = Field
@@ -15,15 +18,11 @@ Field.DefaultSettings = {
 Field.InstanceToWrap = {}
 
 function ConvertRange(Value)
-    if typeof(Value ~= "NumberRange") then
+    if typeof(Value) ~= "NumberRange" then
         return Value
     end
 
     return math.random(Value.Min, Value.Max)
-end
-
-function GetFullDivided(Number, DivideBy)
-    return (Number / DivideBy) - math.fmod(Number, DivideBy)
 end
 
 function Field.GetSettings()
@@ -41,14 +40,15 @@ function Field.new(Instance, ...)
 end
 
 function Field:Constructor(FieldInstance, Settings)
+    self.Settings = {}
+
     for i,v in pairs(Field.DefaultSettings) do
-        Settings[i] = Settings[i] or v
-        self[i] = Settings[i]
+        self.Settings[i] = Settings[i] or v
     end
 
     self.Splitted = not FieldInstance:IsA("BasePart")
     self.Instance = FieldInstance
-    self.CropModel = Assets.Crops:FindFirstChild(self.CropType)
+    self.CropModel = Assets.Crops:FindFirstChild(self.Settings.CropType)
 end
 
 function Field:NewCropExample(Position)
@@ -56,7 +56,7 @@ function Field:NewCropExample(Position)
         return
     end
 
-    if self.MaxCrops and #self.Crops >= self.MaxCrops then
+    if self.Settings.MaxCrops and #self.Crops >= self.Settings.MaxCrops then
         return
     end
 
@@ -76,8 +76,10 @@ function Field:Initialize()
         return
     end
     
-    local CropsFolder = Instance.new("Folder", self.Instance)
-    CropsFolder.Name = "Crops"
+    local CropsModel = Instance.new("Model", self.Instance)
+    CropsModel.Name = "Crops"
+
+    local Settings = self.Settings
 
     self.Crops = {}
     self.Initialized = true
@@ -87,11 +89,33 @@ function Field:Initialize()
         local Start = FieldPosition - Vector3.new(FieldSize.X/2,0,FieldSize.Z/2)
         local CropSize = self.CropModel.Size
 
-        for x = 0, FieldSize.X, CropSize.X + self.CropOffset.X do
-            for z = 0, FieldSize.Z, CropSize.Z + self.CropOffset.Z do
+        for x = 0, FieldSize.X, CropSize.X + Settings.CropOffset.X do
+            for z = 0, FieldSize.Z, CropSize.Z + Settings.CropOffset.Z do
                 self:NewCropExample(Start + Vector3.new(x,0,z))
             end
         end
+    end
+
+    local ModelSize = CropsModel:GetExtentsSize()
+    CropsModel:PivotTo(self.Instance.CFrame + Vector3.new(0,ModelSize.Y/2,0))
+end
+
+function Field:BreakCrops(Crops)
+    Crops = typeof(Crops) ~= "table" and {Crops} or Crops
+    Remotes.CastEffect:FireAllClients("BreakCrops",Crops)
+
+    for i,v in pairs(Crops) do
+        local RespawnTime = ConvertRange(self.Settings.CropRespawnTime)
+
+        v.Transparency = 1
+        CollectionService:RemoveTag(v, "Crop")
+
+        task.delay(RespawnTime,function()
+            local AppearTween = TweenService:Create(v, TweenInfo.new(.5), {
+                Transparency = 0
+            }):Play()
+            CollectionService:AddTag(v, "Crop")
+        end)
     end
 end
 

@@ -29,8 +29,9 @@ function PlayerWrap:Constructor(Instance, Profile)
                 continue
             end
     
-            local ToolClass = Classes.Tools:FindFirstChild(v.CLASS_NAME)
-            table.insert(self[FieldName], ToolClass.new(Instance, v))
+            local ClassScript = Classes[FieldName]:FindFirstChild(v.CLASS_NAME)
+            local Class = require(ClassScript)
+            table.insert(self[FieldName], Class.new(Instance, v))
         end
     end
 
@@ -46,10 +47,10 @@ function PlayerWrap:Initialize()
 
     local function InitializeEquipped(Field, ListName)
         local Index = Profile.Data[Field]
-        local IsIndexValid = self[ListName] <= Index
+        local IsIndexValid = #self[ListName] <= Index
 
         if not Index or not IsIndexValid then
-            return 0
+            return 1
         end
 
         self[ListName][Index]:Initialize()

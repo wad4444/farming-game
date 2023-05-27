@@ -4,8 +4,8 @@ HitboxTracker.__index = HitboxTracker
 
 local DefaultSettings = {
     HitboxInfo = {
-        Start = Vector3.new(-2,2),
-        End = Vector3.new(2,2)
+        Start = Vector3.new(2,2,2),
+        End = Vector3.new(2,2,2)
     },
     CenterDistance = 5,
     MaxPartsPerDetection = math.huge
@@ -39,7 +39,7 @@ function HitboxTracker:Track()
     end
 
     local RootPartCFrame = Character.PrimaryPart.CFrame
-    local Center = RootPartCFrame + RootPartCFrame.LookVector * self.CenterDistance
+    local Center = (RootPartCFrame + RootPartCFrame.LookVector * self.Settings.CenterDistance).Position
     local HitboxInfo = self.Settings.HitboxInfo
 
     local HitboxRegion = Region3.new(Center - HitboxInfo.Start, Center + HitboxInfo.End)
@@ -49,7 +49,8 @@ function HitboxTracker:Track()
     OverlapParameters.FilterType = Enum.RaycastFilterType.Exclude
 
     local Parts = game.Workspace:GetPartBoundsInBox(HitboxRegion.CFrame, HitboxRegion.Size, OverlapParameters)
-    return Parts
+
+    return Parts or {}
 end
 
 function HitboxTracker:TrackCrops()
@@ -61,6 +62,8 @@ function HitboxTracker:TrackCrops()
             table.remove(Parts,i)
         end
     end
+
+    return Parts
 end
 
 return HitboxTracker

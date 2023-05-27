@@ -10,5 +10,7 @@ return {
             CLASS_NAME = "Backpack1",
             Upgrades = {}
         }
-    }
+    },
+    EquippedTool = 1,
+    EquippedBackpack = 1
 }

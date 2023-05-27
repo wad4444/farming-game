@@ -1,9 +1,13 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+
+local Server = ServerScriptService.Server
 
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 local Assets = ReplicatedStorage:WaitForChild("Assets")
 local ToolsPool = Assets.Tools
 
+local FieldClass = require(Server.Classes.Field)
 local HitboxTracker = require(script.HitboxTracker)
 
 local Tool = {}
@@ -41,6 +45,8 @@ function Tool:Unload()
 end
 
 function Tool:InitializeTool()
+    local Character = self.Player.Character or self.Player.CharacterAdded:Wait()
+
     local OriginalModel = ToolsPool:FindFirstChild(self.Settings.Type)
     local Backpack = self.Player:WaitForChild("Backpack")
 
@@ -64,23 +70,30 @@ function Tool:InitializeBridge()
             local FoundCrops = self.HitboxTracker:TrackCrops()
             
             if #FoundCrops > 0 then
-                Remotes.CastEffect:FireAllClients("BreakCrops",FoundCrops)
+                local FieldInstance = FoundCrops[1].Parent.Parent
+                local FieldClass = FieldClass.Get(FieldInstance)
+
+                if not FieldClass then
+                    return
+                end
+
+                FieldClass:BreakCrops(FoundCrops)
             end
         end
     }
 
-    Bridge.OnServerInvoke:Connect(function(Caller, Action)
+    Bridge.OnServerInvoke = function(Caller, Action)
         if Caller ~= self.Player then
             return
         end
 
-        local FindAction = Actions[Caller]
+        local FindAction = Actions[Action]
         if FindAction then
-            FindAction()
+            return FindAction()
         end
-    end)
+    end
 
-    Remotes.SetupTool:FireClient(self.Player, self.SetupType, self.ToolInstance)
+    Remotes.SetupTool:FireClient(self.Player, self.Settings.SetupType, self.ToolInstance)
 end
 
 function Tool:GetInfo()
