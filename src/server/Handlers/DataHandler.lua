@@ -14,7 +14,7 @@ DataHandler.AutoDataPushDelay = 30
 DataHandler.OnLoadData = Signal.new()
 
 local ProfileService = require(ServerScriptService.Server.Libraries.ProfileService)
-local ProfileStore = ProfileService.GetProfileStore("PlayerDataStore2", DataStructure)
+local ProfileStore = ProfileService.GetProfileStore("PlayerDataStore3", DataStructure)
 
 local function PlayerAdded(player)
     local Profile = ProfileStore:LoadProfileAsync(tostring(player.UserId))

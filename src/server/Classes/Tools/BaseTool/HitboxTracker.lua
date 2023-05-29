@@ -31,7 +31,7 @@ function HitboxTracker:Constructor(Tool, Settings)
 end
 
 function HitboxTracker:Track()
-    local Player = self.Tool.Player
+    local Player = self.Tool.Player.Instance
     local Character = Player.Character
 
     if not Character then

@@ -112,11 +112,11 @@ function Field:BreakCrops(Player, Crops)
     end
 
     local PlayerBackpack = Player:GetEquippedBackpack()
-    local IsEnoughSpace = Player.Calculations:CanIncrementWithCapacity(
+    local IsEnoughSpace = true --[[Player.Calculations:CanIncrementWithCapacity(
         {"Crops", self.Settings.CropType},
         DropSumm,
         PlayerBackpack.Settings.Capacity
-    )
+    )]]
 
     if not IsEnoughSpace then
         return
