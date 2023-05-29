@@ -1,3 +1,4 @@
+local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
@@ -25,6 +26,11 @@ function Tool.GetSettings()
     return table.clone(DefaultSettings)
 end
 
+function Tool.new(...)
+    local self = setmetatable({}, Tool)
+    return self:Constructor(...) or self
+end
+
 function Tool:Constructor(Player, ToolSettings)
     self.Player = Player
     self.Settings = {}
@@ -45,10 +51,10 @@ function Tool:Unload()
 end
 
 function Tool:InitializeTool()
-    local Character = self.Player.Character or self.Player.CharacterAdded:Wait()
+    local Character = self.Player.Instance.Character or self.Player.Instance.CharacterAdded:Wait()
 
     local OriginalModel = ToolsPool:FindFirstChild(self.Settings.Type)
-    local Backpack = self.Player:WaitForChild("Backpack")
+    local Backpack = self.Player.Instance:WaitForChild("Backpack")
 
     local NewTool = OriginalModel:Clone()
     NewTool.Parent = Backpack
@@ -68,22 +74,24 @@ function Tool:InitializeBridge()
     local Actions = {
         Activated = function()
             local FoundCrops = self.HitboxTracker:TrackCrops()
-            
-            if #FoundCrops > 0 then
-                local FieldInstance = FoundCrops[1].Parent.Parent
-                local FieldClass = FieldClass.Get(FieldInstance)
 
-                if not FieldClass then
-                    return
-                end
-
-                FieldClass:BreakCrops(FoundCrops)
+            if #FoundCrops <= 0 then
+                return
             end
+
+            local FieldInstance = FoundCrops[1].Parent.Parent
+            local FieldClass = FieldClass.Get(FieldInstance)
+
+            if not FieldClass then
+                return
+            end
+
+            FieldClass:BreakCrops(self.Player, FoundCrops)
         end
     }
 
     Bridge.OnServerInvoke = function(Caller, Action)
-        if Caller ~= self.Player then
+        if Caller ~= self.Player.Instance then
             return
         end
 
@@ -93,15 +101,18 @@ function Tool:InitializeBridge()
         end
     end
 
-    Remotes.SetupTool:FireClient(self.Player, self.Settings.SetupType, self.ToolInstance)
+    Remotes.SetupTool:FireClient(self.Player.Instance, self.Settings.SetupType, self.ToolInstance)
 end
 
 function Tool:GetInfo()
-    return {
-        CLASS_NAME = self.Type,
-        CustomName = self.CustomName,
-        Upgrades = {}
-    }
+    local Info = {}
+
+    for i,v in pairs(DefaultSettings) do
+        local IsDefault = self[i] == v
+        Info[i] = not IsDefault and self[i] or nil
+    end
+
+    return Info
 end
 
 function Tool:Initialize()

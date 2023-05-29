@@ -21,25 +21,31 @@ function PlayerWrap:Constructor(Instance, Profile)
     self.Instance = Instance
     self.Profile = Profile
 
-    local function ConvertToClass(FieldName)
+    local function ConvertToClass(FieldName, ClassName)
         self[FieldName] = {}
 
-        for i,v in pairs(Profile.Data[FieldName] or {}) do
-            if not v.CLASS_NAME then
-                continue
-            end
-    
-            local ClassScript = Classes[FieldName]:FindFirstChild(v.CLASS_NAME)
-            local Class = require(ClassScript)
-            table.insert(self[FieldName], Class.new(Instance, v))
+        local ClassModule = Classes:FindFirstChild(ClassName, true)
+        local Class = require(ClassModule)
+
+        for i,v in pairs(Profile.Data[FieldName]) do
+            local NewTool = Class.new(self, v)
+            table.insert(self[FieldName], NewTool)
         end
     end
 
-    ConvertToClass("Tools")
-    ConvertToClass("Backpacks")
+    ConvertToClass("Backpacks", "BaseBackpack")
+    ConvertToClass("Tools", "BaseTool")
 
     self.Calculations = Calculations.new(self)
     self.PurchaseHandler = PurchaseHandler.new(self)
+end
+
+function PlayerWrap:GetEquippedBackpack()
+    return self.Backpacks[self.Profile.Data.EquippedBackpack]
+end
+
+function PlayerWrap:GetEquippedTool()
+    return self.Tools[self.Profile.Data.EquippedTool]
 end
 
 function PlayerWrap:Initialize()
@@ -56,8 +62,21 @@ function PlayerWrap:Initialize()
         self[ListName][Index]:Initialize()
     end
 
-    InitializeEquipped("EquippedTool", "Tools")
-    InitializeEquipped("EquippedBackpack", "Backpacks")
+    local WasEquipped = false
+
+    local function Equip()
+        WasEquipped = true
+
+        InitializeEquipped("EquippedTool", "Tools")
+        InitializeEquipped("EquippedBackpack", "Backpacks")
+    end
+
+    self.Instance.CharacterAdded:Connect(Equip)
+    task.delay(3,function()
+        if not WasEquipped then
+            Equip()
+        end
+    end)
 end
 
 function PlayerWrap:SyncWithProfile()

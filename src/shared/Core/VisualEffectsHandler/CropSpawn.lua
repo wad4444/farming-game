@@ -9,7 +9,13 @@ local VFXAssets = VFXPool.CropSpawn
 local Trashcan = game.Workspace.Trashcan
 
 return function(Crop)
-    task.wait(.45)
+    local AppearTween = TweenService:Create(Crop, TweenInfo.new(.5), {
+        Transparency = 0
+    })
+
+    AppearTween:Play()
+    
+    task.wait(.4)
 
     local NewEmitter = VFXAssets.Stars:Clone()
     NewEmitter.Parent = Crop

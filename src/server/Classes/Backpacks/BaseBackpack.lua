@@ -10,10 +10,16 @@ Backpack.__index = Backpack
 local DefaultSettings = {
     Type = "Backpack1",
     Upgrades = {},
+    Capacity = 15
 }
 
 function Backpack.GetSettings()
     return table.clone(DefaultSettings)
+end
+
+function Backpack.new(...)
+    local self = setmetatable({}, Backpack)
+    return self:Constructor(...) or self
 end
 
 function Backpack:Constructor(Player, ToolSettings)
@@ -34,8 +40,12 @@ function Backpack:Unload()
 end
 
 function Backpack:Initialize()
+    if self.PackInstance then
+        self.PackInstance:Destroy()
+    end
+
     local OriginalModel = PacksPool:FindFirstChild(self.Settings.Type)
-    local Character = self.Player.Character or self.Player.CharacterAdded:Wait()
+    local Character = self.Player.Instance.Character or self.Player.Instance.CharacterAdded:Wait()
     local Humanoid = Character:WaitForChild("Humanoid")
 
     local NewPack = OriginalModel:Clone()
@@ -45,11 +55,30 @@ function Backpack:Initialize()
     self.PackInstance = NewPack
 end
 
+function Backpack:CropAmountChanged(CropName, Amount, BackpackCapacity)
+    if not self.PackInstance then
+        return
+    end
+
+    local Visuals = self.PackInstance:FindFirstChild(CropName)
+
+    if not Visuals then
+        return
+    end
+
+    local AllObjects = Visuals:GetChildren()
+
+end
+
 function Backpack:GetInfo()
-    return {
-        CLASS_NAME = self.Type,
-        Upgrades = {}
-    }
+    local Info = {}
+
+    for i,v in pairs(DefaultSettings) do
+        local IsDefault = self[i] == v
+        Info[i] = not IsDefault and self[i] or nil
+    end
+
+    return Info
 end
 
 return Backpack

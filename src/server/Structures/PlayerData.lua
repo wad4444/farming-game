@@ -1,15 +1,17 @@
 return {
     Tools = {
         {
-            CLASS_NAME = "Sickle1",
-            Upgrades = {}
+            Type = "Sickle1",
         }
     },
     Backpacks = {
         {
-            CLASS_NAME = "Backpack1",
-            Upgrades = {}
+            Type = "Backpack1",
         }
+    },
+    Crops = {
+        Wheat = 0,
+        Carrots = 0
     },
     EquippedTool = 1,
     EquippedBackpack = 1

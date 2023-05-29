@@ -15,7 +15,7 @@ Remotes.CastEffect.OnClientEvent:Connect(function(EffectName, ...)
     end
 end)
 
-CollectionService:GetInstanceAddedSignal("Crop"):Connect(function(Crop)
+CollectionService:GetInstanceAddedSignal("ReadyToSpawn"):Connect(function(Crop)
     if Crop:IsDescendantOf(Trashcan) then
         return
     end

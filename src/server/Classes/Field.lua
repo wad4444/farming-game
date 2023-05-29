@@ -5,6 +5,9 @@ local TweenService = game:GetService("TweenService")
 local Assets = ReplicatedStorage.Assets
 local Remotes = ReplicatedStorage.Remotes
 
+local Classes = script.Parent
+local PlayerWrap = require(Classes.PlayerWrap)
+
 local Field = {}
 Field.__index = Field
 
@@ -100,23 +103,35 @@ function Field:Initialize()
     CropsModel:PivotTo(self.Instance.CFrame + Vector3.new(0,ModelSize.Y/2,0))
 end
 
-function Field:BreakCrops(Crops)
+function Field:BreakCrops(Player, Crops)
     Crops = typeof(Crops) ~= "table" and {Crops} or Crops
     Remotes.CastEffect:FireAllClients("BreakCrops",Crops)
+
+    local DropSumm = 0
 
     for i,v in pairs(Crops) do
         local RespawnTime = ConvertRange(self.Settings.CropRespawnTime)
 
         v.Transparency = 1
         CollectionService:RemoveTag(v, "Crop")
+        CollectionService:RemoveTag(v, "ReadyToSpawn")
+
+        DropSumm += ConvertRange(self.Settings.CropDropAmount)
 
         task.delay(RespawnTime,function()
-            local AppearTween = TweenService:Create(v, TweenInfo.new(.5), {
-                Transparency = 0
-            }):Play()
+            CollectionService:AddTag(v, "ReadyToSpawn")
+            task.wait(.5)
             CollectionService:AddTag(v, "Crop")
         end)
     end
+
+    local PlayerBackpack = Player:GetEquippedBackpack()
+
+    Player.Calculations:IncrementWithCapacity(
+        {"Crops", self.Settings.CropType},
+        DropSumm,
+        PlayerBackpack.Settings.Capacity
+    )
 end
 
 return Field

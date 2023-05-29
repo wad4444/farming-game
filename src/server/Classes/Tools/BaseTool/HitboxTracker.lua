@@ -55,15 +55,16 @@ end
 
 function HitboxTracker:TrackCrops()
     local Parts = self:Track()
+    local ValidCrops = {}
 
     for i,v in pairs(Parts) do
-        local IsCrop = CollectionService:HasTag(v, "Crop")
-        if not IsCrop then
-            table.remove(Parts,i)
+        local IsCrop = CollectionService:HasTag(v, "Crop") and v.Transparency < 1
+        if IsCrop then
+            table.insert(ValidCrops, v)
         end
     end
 
-    return Parts
+    return ValidCrops
 end
 
 return HitboxTracker

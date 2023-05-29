@@ -31,7 +31,10 @@ return function(Crops)
         local ClonedEmitters = {}
 
         for i,v in pairs(VFXAssets:GetChildren()) do
-            ClonedEmitters[v.Name] = v:Clone()
+            local Cloned = v:Clone()
+            Cloned.Parent = Crop
+            
+            ClonedEmitters[v.Name] = Cloned
         end
 
         Emitters = ClonedEmitters
