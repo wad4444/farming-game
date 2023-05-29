@@ -18,7 +18,8 @@ Remotes.SetupTool.OnClientEvent:Connect(function(SetupType, ...)
 
     if FindType then
         FindType(...)
-    else
-        warn("The SetupType you mentioed in the server script doesn't exist!\n Please update the client script.\n Setup type: "..SetupType)
+        return
     end
+
+    warn("The SetupType you mentioed in the server script doesn't exist!\n Please update the client script.\n Setup type: "..SetupType)
 end)

@@ -105,9 +105,30 @@ end
 
 function Field:BreakCrops(Player, Crops)
     Crops = typeof(Crops) ~= "table" and {Crops} or Crops
-    Remotes.CastEffect:FireAllClients("BreakCrops",Crops)
 
     local DropSumm = 0
+    for i,v in pairs(Crops) do
+        DropSumm += ConvertRange(self.Settings.CropDropAmount)
+    end
+
+    local PlayerBackpack = Player:GetEquippedBackpack()
+    local IsEnoughSpace = Player.Calculations:CanIncrementWithCapacity(
+        {"Crops", self.Settings.CropType},
+        DropSumm,
+        PlayerBackpack.Settings.Capacity
+    )
+
+    if not IsEnoughSpace then
+        return
+    end
+
+    Player.Calculations:IncrementWithCapacity(
+        {"Crops", self.Settings.CropType},
+        DropSumm,
+        PlayerBackpack.Settings.Capacity
+    )
+
+    Remotes.CastEffect:FireAllClients("BreakCrops",Crops)
 
     for i,v in pairs(Crops) do
         local RespawnTime = ConvertRange(self.Settings.CropRespawnTime)
@@ -116,22 +137,12 @@ function Field:BreakCrops(Player, Crops)
         CollectionService:RemoveTag(v, "Crop")
         CollectionService:RemoveTag(v, "ReadyToSpawn")
 
-        DropSumm += ConvertRange(self.Settings.CropDropAmount)
-
         task.delay(RespawnTime,function()
             CollectionService:AddTag(v, "ReadyToSpawn")
             task.wait(.5)
             CollectionService:AddTag(v, "Crop")
         end)
     end
-
-    local PlayerBackpack = Player:GetEquippedBackpack()
-
-    Player.Calculations:IncrementWithCapacity(
-        {"Crops", self.Settings.CropType},
-        DropSumm,
-        PlayerBackpack.Settings.Capacity
-    )
 end
 
 return Field

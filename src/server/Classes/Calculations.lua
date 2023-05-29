@@ -94,6 +94,28 @@ function Calculations:IncrementWithCapacity(StatName, IncrementBy, Capacity, Can
     return true
 end
 
+function Calculations:CanIncrementWithCapacity(StatName, IncrementBy, Capacity, CanGoNegative)
+    local Table, Stat = self:FindOnPath(StatName)
+
+    if Table and not Stat then
+        error("Cant increment on a table")
+    end
+
+    if CanGoNegative then
+        return true
+    end
+
+    if (Table[Stat] + IncrementBy) < 0 then
+        return
+    end
+
+    if (Table[Stat] + IncrementBy) > Capacity then
+        return
+    end
+
+    return true
+end
+
 function Calculations:Set(StatName, SetTo)
     local Table, Stat = self:FindOnPath(StatName)
 
