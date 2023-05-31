@@ -5,16 +5,17 @@ local Players = game:GetService("Players")
 local ServerLibs = ServerScriptService.Server
 local DataStructure = require(ServerLibs.Structures.PlayerData)
 local PlayerWrap = require(ServerLibs.Classes.PlayerWrap)
+local ReplicaService = require(ServerLibs.Libraries.ReplicaService)
 
 local Signal = require(ReplicatedStorage.Shared.Libraries.Signal)
 
 local DataHandler = {}
 DataHandler.AutoDataPushDelay = 30
-
 DataHandler.OnLoadData = Signal.new()
 
+
 local ProfileService = require(ServerScriptService.Server.Libraries.ProfileService)
-local ProfileStore = ProfileService.GetProfileStore("PlayerDataStore3", DataStructure)
+local ProfileStore = ProfileService.GetProfileStore("PlayerDataStore8", DataStructure.Structure)
 
 local function PlayerAdded(player)
     local Profile = ProfileStore:LoadProfileAsync(tostring(player.UserId))

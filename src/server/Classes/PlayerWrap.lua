@@ -1,6 +1,11 @@
 local Classes = script.Parent
+local Libraries = Classes.Parent.Libraries
+
 local Calculations = require(Classes.Calculations)
 local PurchaseHandler = require(Classes.PurchaseHandler)
+local ReplicaService = require(Libraries.ReplicaService)
+
+local PlayerProfileClassToken = ReplicaService.NewClassToken("PlayerProfile")
 
 local PlayerWrap = {}
 PlayerWrap.__index = PlayerWrap
@@ -20,6 +25,12 @@ end
 function PlayerWrap:Constructor(Instance, Profile)
     self.Instance = Instance
     self.Profile = Profile
+
+    self.Replica = ReplicaService.NewReplica({
+        ClassToken = PlayerProfileClassToken,
+        Replication = Instance,
+        Data = Profile.Data
+    })
 
     local function ConvertToClass(FieldName, ClassName)
         self[FieldName] = {}

@@ -1,8 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 
-require(ReplicatedStorage.Shared.Core.VisualEffectsHandler)
-
 local Types = {
     Default = function(Tool : Tool)
         local Bridge = Tool:WaitForChild("Bridge")

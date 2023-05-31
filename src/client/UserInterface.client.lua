@@ -15,11 +15,13 @@ local Interface = Roact.createElement("ScreenGui",{
 },{
     CoinsBar = Roact.createElement(CustomElements.StatBar, {
         IconId = "rbxassetid://13589076524",
-        Position = UDim2.fromScale(0.85,0.5)
+        Position = UDim2.fromScale(0.85,0.5),
+        Path = {"Coins"}
     }),
     WheatBar = Roact.createElement(CustomElements.StatBar, {
         IconId = "rbxassetid://13588650780",
-        Position = UDim2.fromScale(0.85,0.6)
+        Position = UDim2.fromScale(0.85,0.58),
+        Path = {"Crops", "Wheat"}
     })
 })
 

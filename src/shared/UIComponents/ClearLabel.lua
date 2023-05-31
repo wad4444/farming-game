@@ -12,7 +12,8 @@ function ClearLabel:render()
         Size = self.props.Size,
         Position = self.props.Position,
         TextColor3 = self.props.TextColor3,
-        TextStrokeColor3 = self.props.TextStrokeColor3
+        TextStrokeColor3 = self.props.TextStrokeColor3,
+        Text = self.props.Text
     })
 
     return NewLabel

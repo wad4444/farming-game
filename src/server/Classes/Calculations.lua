@@ -9,11 +9,12 @@ end
 
 function Calculations:Constructor(Player)
     self.Player = Player
+    self.Replica = self.Player.Replica
 end
 
 function Calculations:FindOnPath(Path)
     local GlobalEntrancePoint = self.Player.Profile.Data
-    local Splitted = typeof(Path) == "string" and string.split(Path, ".") or Path
+    local Splitted = Path
 
     if #Splitted < 1 then
         error("Provided table path is not valid")
@@ -41,22 +42,16 @@ function Calculations:FindOnPath(Path)
     return PathRecursive(GlobalEntrancePoint, 1)
 end
 
-function Calculations:FindStat(StatName)
-    local Profile = self.Player.Profile
-    local Stat = Profile.Data[StatName]
-
-    return Stat
-end
-
-function Calculations:Increment(StatName, IncrementBy, CanGoNegative)
-    local Table, Stat = self:FindOnPath(StatName)
+function Calculations:Increment(Path, IncrementBy, CanGoNegative)
+    local Table, Stat = self:FindOnPath(Path)
 
     if Table and not Stat then
         error("Cant increment on a table")
     end
 
     if CanGoNegative then
-        Table[Stat] += IncrementBy
+        self.Replica:SetValue(Path, Table[Stat] + IncrementBy)
+
         return true
     end
 
@@ -64,20 +59,21 @@ function Calculations:Increment(StatName, IncrementBy, CanGoNegative)
         return
     end
 
-    Table[Stat] += IncrementBy
+    self.Replica:SetValue(Path, Table[Stat] + IncrementBy)
 
     return true
 end
 
-function Calculations:IncrementWithCapacity(StatName, IncrementBy, Capacity, CanGoNegative)
-    local Table, Stat = self:FindOnPath(StatName)
+function Calculations:IncrementWithCapacity(Path, IncrementBy, Capacity, CanGoNegative)
+    local Table, Stat = self:FindOnPath(Path)
 
     if Table and not Stat then
         error("Cant increment on a table")
     end
 
     if CanGoNegative then
-        Table[Stat] += IncrementBy
+        self.Replica:SetValue(Path, Table[Stat] + IncrementBy)
+
         return true
     end
 
@@ -89,7 +85,8 @@ function Calculations:IncrementWithCapacity(StatName, IncrementBy, Capacity, Can
         return
     end
 
-    Table[Stat] += IncrementBy
+    
+    self.Replica:SetValue(Path, Table[Stat] + IncrementBy)
 
     return true
 end
@@ -116,14 +113,8 @@ function Calculations:CanIncrementWithCapacity(StatName, IncrementBy, Capacity, 
     return true
 end
 
-function Calculations:Set(StatName, SetTo)
-    local Table, Stat = self:FindOnPath(StatName)
-
-    if Table and not Stat then
-        Table = SetTo
-    else
-        Table[Stat] = SetTo
-    end
+function Calculations:Set(Path, SetTo)
+    self.Replica:SetValue(Path, SetTo)
 end
 
 return Calculations

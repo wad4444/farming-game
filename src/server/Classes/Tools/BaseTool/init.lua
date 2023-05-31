@@ -92,7 +92,6 @@ function Tool:InitializeBridge()
 
     Bridge.OnServerInvoke = function(Caller, Action)
         if Caller ~= self.Player.Instance then
-            print("DOWN BAD")
             return
         end
 
