@@ -131,6 +131,10 @@ function Field:BreakCrops(Player, Crops)
     Remotes.CastEffect:FireAllClients("BreakCrops",Crops)
 
     for i,v in pairs(Crops) do
+        if not CollectionService:HasTag(v, "Crop") then
+            continue
+        end
+
         local RespawnTime = ConvertRange(self.Settings.CropRespawnTime)
 
         v.Transparency = 1
@@ -139,10 +143,15 @@ function Field:BreakCrops(Player, Crops)
 
         task.delay(RespawnTime,function()
             CollectionService:AddTag(v, "ReadyToSpawn")
+
             task.wait(.5)
+
             CollectionService:AddTag(v, "Crop")
+            v.Transparency = 0
         end)
     end
+        
+    return true
 end
 
 return Field

@@ -15,6 +15,7 @@ return {
             Carrots = 0
         },
         EquippedTool = 1,
-        EquippedBackpack = 1
+        EquippedBackpack = 1,
+        Coins = 0
     }
 }
