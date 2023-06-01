@@ -8,6 +8,7 @@ return {
         Backpacks = {
             {
                 Type = "Backpack1",
+                Capacity = 9e9
             }
         },
         Crops = {

@@ -10,7 +10,7 @@ Backpack.__index = Backpack
 local DefaultSettings = {
     Type = "Backpack1",
     Upgrades = {},
-    Capacity = 15
+    Capacity = 40
 }
 
 function Backpack.GetSettings()

@@ -57,8 +57,6 @@ function ClientHandler.Initialize()
     ReplicaController.ReplicaOfClassCreated("PlayerProfile", function(Replica)
         Initialized = true
 
-        print(Replica.Data)
-
         AddCallback = function(Path, Callback)
             local Table, Index = AllocatePath(Replica.Data, Path)
             Callback(Table and Index and (Table[Index]) or Table and Table or nil)

@@ -15,7 +15,7 @@ DataHandler.OnLoadData = Signal.new()
 
 
 local ProfileService = require(ServerScriptService.Server.Libraries.ProfileService)
-local ProfileStore = ProfileService.GetProfileStore("PlayerDataStore8", DataStructure.Structure)
+local ProfileStore = ProfileService.GetProfileStore("PlayerDataStore8AWIDGUYHB", DataStructure.Structure)
 
 local function PlayerAdded(player)
     local Profile = ProfileStore:LoadProfileAsync(tostring(player.UserId))

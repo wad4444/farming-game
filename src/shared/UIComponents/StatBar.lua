@@ -1,6 +1,10 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Roact = require(ReplicatedStorage.Shared.Libraries.Roact)
-local ClientDataHandler = require(ReplicatedStorage.Shared.Core.ClientDataHandler)
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Assets = ReplicatedStorage:WaitForChild("Assets")
+
+local Roact = require(Shared.Libraries.Roact)
+local ClientDataHandler = require(Shared.Core.ClientDataHandler)
+local UIParticles = require(Shared.Libraries.UIParticles)
 
 local UIComponents = script.Parent
 
@@ -8,7 +12,8 @@ local StatBar = Roact.Component:extend("StatBar")
 
 function StatBar:init()
     self.ValueName = self.props.Path[#self.props.Path]
-
+    self.IconRef = Roact.createRef()
+    
     self:setState({
         CounterValue = 0
     })
@@ -26,7 +31,9 @@ function StatBar:render()
             Image = self.props.IconId,
             Position = UDim2.fromScale(0.75, -0.43),
             Size = UDim2.fromScale(0.35, 1.8),
-            BackgroundTransparency = 1
+            BackgroundTransparency = 1,
+
+            [Roact.Ref] = self.IconRef
         }, {
             Roact.createElement("UIAspectRatioConstraint")
         }),
@@ -70,6 +77,37 @@ function StatBar:render()
     return BarElement
 end
 
+function StatBar:SetupParticles()
+    if not self.Particles then
+        self.Particles = {
+            Stars = UIParticles.new(self.IconRef:getValue(), Assets.VFXPool.UIParticles.Star)
+        }
+
+        self.Particles.Stars.onSpawn = function(Particle)
+            local randomizedSize = math.random(1,4)
+
+            Particle.starterPosition = UDim2.fromScale(math.random(2,8) / 10, 0)
+            Particle.element.Size += UDim2.fromOffset(randomizedSize, randomizedSize)
+            Particle.velocity = Vector2.new(math.random(-175, 175), math.random(-200, 100));
+            Particle.maxAge = 1;
+        end
+
+        self.Particles.Stars.onUpdate = function(Particle, DeltaTime)
+            Particle.velocity = Particle.velocity + Vector2.new(0, math.random(5,20));
+            Particle.element.ImageTransparency += 1 * DeltaTime
+            Particle.element.Rotation += math.random(100,200) * DeltaTime
+            Particle.position = Particle.position + (Particle.velocity/3 * DeltaTime);
+        end
+    end
+end
+
+function StatBar:ChangeEffect()
+    self:SetupParticles()
+
+    local Stars = self.Particles.Stars
+    Stars:Emit(math.random(5,8))
+end
+
 function StatBar:didMount()
     self.IsActive = true
 
@@ -77,6 +115,8 @@ function StatBar:didMount()
         if not self.IsActive then
             return
         end
+
+        self:ChangeEffect()
 
         self:setState({
             CounterValue = NewValue,
@@ -86,6 +126,10 @@ end
 
 function StatBar:willUnmount()
     self.IsActive = false
+
+    for i,v in pairs(self.Particles) do
+        v:Destroy()
+    end
 end
 
 return StatBar

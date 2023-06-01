@@ -26,17 +26,6 @@ local DefaultSettings = {
     TrackerSettings = HitboxTracker.GetSettings()
 }
 
-function GetAnimationInstanceByName(AnimationName)
-    local AnimationInstance = Assets.Animations:FindFirstChild(AnimationName)
-
-    if not AnimationInstance then
-        warn("Could not find animation by name '"..AnimationName.."'. Returning empty placeholder")
-        return Instance.new("Animation")
-    end
-
-    return AnimationInstance
-end
-
 function Tool.GetSettings()
     return table.clone(DefaultSettings)
 end
@@ -89,23 +78,6 @@ function Tool:InitializeTool()
     self.Debounce = false
 end
 
-function Tool:InitializeAnimations()
-    local PlayerInstance = self.Player.Instance
-    local Character = PlayerInstance.Character or PlayerInstance.CharacterAdded:Wait()
-
-    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-    local Animator = Humanoid:WaitForChild("Animator")
-
-    self.LoadedAnimations = {}
-
-    for i,v in pairs(self.Settings.Animations) do
-        local HitAnimation = GetAnimationInstanceByName(self.Settings.Animations.Hit)
-        local AnimationTrack = Animator:LoadAnimation(HitAnimation)
-
-        self.LoadedAnimations[i] = AnimationTrack
-    end
-end
-
 function Tool:InitializeBridge()
     if not self.ToolInstance then
         warn("You tried to initialize bridge of tool instance before initializing tool")
@@ -122,8 +94,7 @@ function Tool:InitializeBridge()
             end
             
             self:StartDebounce()
-
-            self.LoadedAnimations.Hit:Play()
+            self.Player:PlayAnimation(self.Settings.Animations.Hit)
 
             local FoundCrops = self.HitboxTracker:TrackCrops()
 
@@ -170,9 +141,6 @@ end
 function Tool:Initialize()
     self:InitializeTool()
     self:InitializeBridge()
-    self:InitializeAnimations()
-
-    self.Player.Instance.CharacterAdded:Connect(self.InitializeAnimations)
 end
 
 return Tool

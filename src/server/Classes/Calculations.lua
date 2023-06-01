@@ -113,6 +113,20 @@ function Calculations:CanIncrementWithCapacity(StatName, IncrementBy, Capacity, 
     return true
 end
 
+function Calculations:DifferenceFromCapacity(StatName, Capacity)
+    local Table, Stat = self:FindOnPath(StatName)
+
+    if Table and not Stat then
+        error("Cant get difference on a table")
+    end
+
+    if typeof(Table[Stat]) ~= "number" then
+        error("The end value must be a number")
+    end
+
+    return Capacity - Table[Stat]
+end
+
 function Calculations:Set(Path, SetTo)
     self.Replica:SetValue(Path, SetTo)
 end

@@ -1,3 +1,6 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Assets = ReplicatedStorage:WaitForChild("Assets")
+
 local Classes = script.Parent
 local Libraries = Classes.Parent.Libraries
 
@@ -12,6 +15,16 @@ PlayerWrap.__index = PlayerWrap
 
 local InstanceToWrap = {}
 
+function GetAnimationInstanceByName(AnimationName)
+    local AnimationInstance = Assets.Animations:FindFirstChild(AnimationName)
+
+    if not AnimationInstance then
+        return
+    end
+
+    return AnimationInstance
+end
+
 function PlayerWrap.new(Instance, ...)
     local self = setmetatable({}, PlayerWrap)
     InstanceToWrap[Instance] = self
@@ -20,6 +33,27 @@ end
 
 function PlayerWrap.get(Instance)
     return InstanceToWrap[Instance]
+end
+
+function PlayerWrap:PlayAnimation(AnimationName)
+    local Character = self.Instance.Character
+
+    if not Character then
+        return
+    end
+
+    local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+    local Animator = Humanoid:WaitForChild("Animator")
+
+    local HitAnimation = GetAnimationInstanceByName(AnimationName)
+
+    if not HitAnimation then
+        return
+    end
+
+    local AnimationTrack = Animator:LoadAnimation(HitAnimation)
+
+    AnimationTrack:Play()
 end
 
 function PlayerWrap:Constructor(Instance, Profile)

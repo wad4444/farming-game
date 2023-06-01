@@ -14,7 +14,7 @@ Field.__index = Field
 Field.DefaultSettings = {
     CropType = "Wheat",
     CropRespawnTime = NumberRange.new(10,15),
-    CropDropAmount = NumberRange.new(1,3),
+    CropDropAmount = NumberRange.new(1,2),
     CropOffset = Vector3.new(0,0,0),
     MaxCrops = nil
 }
@@ -112,14 +112,23 @@ function Field:BreakCrops(Player, Crops)
     end
 
     local PlayerBackpack = Player:GetEquippedBackpack()
-    local IsEnoughSpace = true --[[Player.Calculations:CanIncrementWithCapacity(
+    local IsEnoughSpace = Player.Calculations:CanIncrementWithCapacity(
         {"Crops", self.Settings.CropType},
         DropSumm,
         PlayerBackpack.Settings.Capacity
-    )]]
+    )
 
     if not IsEnoughSpace then
-        return
+        local Difference = Player.Calculations:DifferenceFromCapacity(
+            {"Crops", self.Settings.CropType},
+            PlayerBackpack.Settings.Capacity
+        )
+
+        if Difference <= 0 then
+            return
+        end
+
+        DropSumm = Difference
     end
 
     Player.Calculations:IncrementWithCapacity(
@@ -150,7 +159,7 @@ function Field:BreakCrops(Player, Crops)
             v.Transparency = 0
         end)
     end
-        
+
     return true
 end
 
