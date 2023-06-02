@@ -60,14 +60,21 @@ function ClientHandler.Initialize()
         AddCallback = function(Path, Callback)
             local Table, Index = AllocatePath(Replica.Data, Path)
             Callback(Table and Index and (Table[Index]) or Table and Table or nil)
+
             Replica:ListenToChange(Path, Callback)
         end
 
         for Path,Callback in pairs(Binds) do
             local Table, Index = AllocatePath(Replica.Data, Path)
             Callback(Table and Index and (Table[Index]) or Table and Table or nil)
+
             Replica:ListenToChange(Path, Callback)
         end
+
+        _G.ProfileData = Replica.Data
+        Replica:ConnectOnClientEvent(function()
+            _G.ProfileData = Replica.Data
+        end)
     end)
 
     ReplicaController.RequestData()

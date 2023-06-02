@@ -86,14 +86,14 @@ function StatBar:SetupParticles()
         self.Particles.Stars.onSpawn = function(Particle)
             local randomizedSize = math.random(1,4)
 
-            Particle.starterPosition = UDim2.fromScale(math.random(2,8) / 10, 0)
+            Particle.starterPosition = UDim2.fromScale(.5, .5)
             Particle.element.Size += UDim2.fromOffset(randomizedSize, randomizedSize)
-            Particle.velocity = Vector2.new(math.random(-175, 175), math.random(-200, 100));
-            Particle.maxAge = 1;
+            Particle.velocity = Vector2.new(math.random(-175, 175), math.random(-450,-250));
+            Particle.maxAge = math.random(7,10)/10;
         end
 
         self.Particles.Stars.onUpdate = function(Particle, DeltaTime)
-            Particle.velocity = Particle.velocity + Vector2.new(0, math.random(5,20));
+            Particle.velocity = Particle.velocity + Vector2.new(0, 10);
             Particle.element.ImageTransparency += 1 * DeltaTime
             Particle.element.Rotation += math.random(100,200) * DeltaTime
             Particle.position = Particle.position + (Particle.velocity/3 * DeltaTime);
@@ -116,7 +116,9 @@ function StatBar:didMount()
             return
         end
 
-        self:ChangeEffect()
+        if self.state.CounterValue < NewValue then
+            self:ChangeEffect()
+        end
 
         self:setState({
             CounterValue = NewValue,

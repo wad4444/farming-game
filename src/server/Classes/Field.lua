@@ -39,6 +39,7 @@ end
 function Field.new(Instance, ...)
     local self = setmetatable({}, Field)
     Field.InstanceToWrap[Instance] = self
+    
     return self:Constructor(Instance, ...) or self
 end
 

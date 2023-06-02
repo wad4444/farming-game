@@ -13,7 +13,7 @@ for i,v in pairs(ServerModules.Classes:GetChildren()) do
     Classes[v.Name] = require(v)
 end
 
-local ObjectTags = {"Field"}
+local ObjectTags = {"Field", "SellCircle"}
 
 local Switch = {
     Field = function(FieldInstance)
@@ -26,6 +26,17 @@ local Switch = {
 
         local NewField = Field.new(FieldInstance, Settings)
         NewField:Initialize()
+    end,
+    SellCircle = function(CircleInstance)
+       local SellCircle = Classes.SellCircle
+
+       local Settings = SellCircle.GetSettings()
+       for i,v in pairs(Settings) do
+           Settings[i] = CircleInstance:GetAttribute(i) or v
+       end
+
+       local NewCircle = SellCircle.new(CircleInstance, Settings)
+       NewCircle:Initialize()
     end
 }
 

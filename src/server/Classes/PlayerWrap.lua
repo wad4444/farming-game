@@ -28,6 +28,7 @@ end
 function PlayerWrap.new(Instance, ...)
     local self = setmetatable({}, PlayerWrap)
     InstanceToWrap[Instance] = self
+    
     return self:Constructor(Instance, ...) or self
 end
 
