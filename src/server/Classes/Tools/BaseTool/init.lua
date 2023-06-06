@@ -8,7 +8,7 @@ local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 local Assets = ReplicatedStorage:WaitForChild("Assets")
 local ToolsPool = Assets.Tools
 
-local FieldClass = require(Server.Classes.Field)
+local FieldComponent = require(Server.Components.Field)
 local HitboxTracker = require(script.HitboxTracker)
 
 local Tool = {}
@@ -103,7 +103,7 @@ function Tool:InitializeBridge()
             end
 
             local FieldInstance = FoundCrops[1].Parent.Parent
-            local FieldClass = FieldClass.Get(FieldInstance)
+            local FieldClass = FieldComponent:FromInstance(FieldInstance)
 
             if not FieldClass then
                 return

@@ -53,7 +53,3 @@ Remotes.RequestSelling.OnClientInvoke = function(CirlceSettings, Currency1Amount
 
     return PopUps.Question(Question)
 end
-
-task.delay(5,function()
-    PopUps.Notification("How's it goiun")
-end)
