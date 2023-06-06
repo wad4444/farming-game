@@ -34,11 +34,8 @@ function PopUp:init()
             ["Enabled"] = false
         }
     }
-    self.MainFrameRef = Roact.createRef()
-end
 
-function PopUp:render()
-    local function CanTween()
+    self.CanTween = function()
         if self._Destroying then
             return
         end
@@ -46,19 +43,11 @@ function PopUp:render()
         return true
     end
 
-    local PopUpGui = Roact.createElement("ScreenGui", {
-        ResetOnSpawn = true,
-        Name = "PopUp"
-    }, {
-        Roact.createElement("Frame", {
-        Position = UDim2.fromScale(.5, .5),
-        Size = UDim2.fromScale(.4, .5),
-        Name = "PopUp",
-        AnchorPoint = Vector2.new(.5, .5),
-        BackgroundColor3 = Color3.fromHex("ffffff"),
+    self.MainFrameRef = Roact.createRef()
+end
 
-        [Roact.Ref] = self.MainFrameRef
-    }, {
+function PopUp:render()
+    local ChildrenTable = {
         UICorner = Roact.createElement("UICorner", {
             CornerRadius = UDim.new(.05, 0)
         }),
@@ -95,38 +84,13 @@ function PopUp:render()
             Size = UDim2.fromScale(.09, .2),
             Text = "X",
 
-            CanTween = CanTween,
+            CanTween = self.CanTween,
 
             Callback = function()
-                self.props.Callback(false)
-                self:Close()
-            end
-        }),
-        Option1 = Roact.createElement(CustomButton1, {
-            Position = UDim2.fromScale(0.27, 0.82),
-            BackgroundColor3 = Color3.fromHex("7cff35"),
-            StrokeColor = Color3.fromHex("61c228"),
-            Size = UDim2.fromScale(.19, .11),
-            Text = "YES",
+                if self.props.Callback then
+                    self.props.Callback(false)
+                end
 
-            CanTween = CanTween,
-
-            Callback = function()
-                self.props.Callback(true)
-                self:Close()
-            end
-        }),
-        Option2 = Roact.createElement(CustomButton1, {
-            Position = UDim2.fromScale(0.67, 0.82),
-            BackgroundColor3 = Color3.fromHex("ff3939"),
-            StrokeColor = Color3.fromHex("c22a2a"),
-            Size = UDim2.fromScale(.19, .11),
-            Text = "NO",
-
-            CanTween = CanTween,
-
-            Callback = function()
-                self.props.Callback(false)
                 self:Close()
             end
         }),
@@ -135,7 +99,7 @@ function PopUp:render()
             TextScaled = true,
             TextColor3 = Color3.fromHex("ffffff"),
             Position = UDim2.fromScale(.075, .1),
-            Size = UDim2.fromScale(.83, .55),
+            Size = self.props.MessageLabelSize or UDim2.fromScale(.83, .75),
             Font = Enum.Font.FredokaOne,
 
             Text = self.props.Text,
@@ -144,10 +108,35 @@ function PopUp:render()
                 Thickness = 4,
                 Color = Color3.fromHex("ffdd34"),
             }),
-        })
-    })})
+        }),
+    }
 
-    return PopUpGui
+    for i,v in pairs(self.props.Buttons) do
+        ChildrenTable[i] = v
+        v.props.CanTween = self.CanTween
+
+        v.props.Callback = function()
+            self:Close()
+
+            if not v.props.CallbackFunction then
+                return  
+            end
+
+            v.props.CallbackFunction(table.unpack(v.props.CallbackArguments))
+        end
+    end
+
+    local PopUpFrame = Roact.createElement("Frame", {
+        Position = UDim2.fromScale(.5, .5),
+        Size = UDim2.fromScale(.4, .5),
+        Name = "PopUp",
+        AnchorPoint = Vector2.new(.5, .5),
+        BackgroundColor3 = Color3.fromHex("ffffff"),
+
+        [Roact.Ref] = self.MainFrameRef
+    }, ChildrenTable)
+
+    return PopUpFrame
 end
 
 function PopUp:Close()
@@ -190,7 +179,9 @@ function PopUp:Close()
 
     task.wait(DisappearTime)
 
-    self.props.UnmountCallback()
+    if self.props.UnmountCallback then
+        self.props.UnmountCallback()
+    end
 end
 
 function PopUp:didMount()

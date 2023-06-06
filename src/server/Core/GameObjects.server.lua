@@ -3,6 +3,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local CollectionService = game:GetService("CollectionService")
 
 local ServerModules = ServerScriptService.Server
+local Structures = ServerModules.Structures
 local Classes = {}
 
 for i,v in pairs(ServerModules.Classes:GetChildren()) do
@@ -13,7 +14,7 @@ for i,v in pairs(ServerModules.Classes:GetChildren()) do
     Classes[v.Name] = require(v)
 end
 
-local ObjectTags = {"Field", "SellCircle"}
+local ObjectTags = {"Field", "SellCircle", "Shop"}
 
 local Switch = {
     Field = function(FieldInstance)
@@ -37,6 +38,18 @@ local Switch = {
 
        local NewCircle = SellCircle.new(CircleInstance, Settings)
        NewCircle:Initialize()
+    end,
+    Shop = function(ShopInstance)
+        local Shop = Classes.Shop
+        local ConfigName = ShopInstance:GetAttribute("Config")
+
+        if not Structures.ShopConfigs:FindFirstChild(ConfigName) then
+            warn("Not a valid shop config")
+            return
+        end
+        
+        local NewShop = Shop.new(ShopInstance, ConfigName)
+        NewShop:Initialize()
     end
 }
 

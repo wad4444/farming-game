@@ -13,6 +13,7 @@ end
 
 function CustomButton1:render()
     local NewButton = Roact.createElement("TextButton",{
+        Name = self.props.Name,
         TextScaled = true,
         BackgroundColor3 = self.props.BackgroundColor3 or Color3.fromHex("ff0000"),
         TextColor3 = Color3.fromHex("ffffff"),

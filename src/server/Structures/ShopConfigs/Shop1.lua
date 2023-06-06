@@ -1,0 +1,6 @@
+return {
+    Categories = {
+        ['Tools'] = {},
+        ['Backpacks'] = {}
+    }
+}

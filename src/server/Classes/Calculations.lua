@@ -64,6 +64,12 @@ function Calculations:Increment(Path, IncrementBy, CanGoNegative)
     return true
 end
 
+function Calculations:Get(Path)
+    local Table, Stat = self:FindOnPath(Path)
+
+    return Table and Stat and Table[Stat] or Table
+end
+
 function Calculations:IncrementWithCapacity(Path, IncrementBy, Capacity, CanGoNegative)
     local Table, Stat = self:FindOnPath(Path)
 

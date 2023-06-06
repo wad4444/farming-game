@@ -13,6 +13,10 @@ local DefaultSettings = {
     Capacity = 40
 }
 
+function RoundToWhole(Number)
+    return math.floor(Number) + .5
+end
+
 function Backpack.GetSettings()
     return table.clone(DefaultSettings)
 end
@@ -55,19 +59,23 @@ function Backpack:Initialize()
     self.PackInstance = NewPack
 end
 
-function Backpack:CropAmountChanged(CropName, Amount, BackpackCapacity)
-    if not self.PackInstance then
+function Backpack:CropAmountChanged(CropName, Amount)
+    --[[if not self.PackInstance then
         return
     end
 
     local Visuals = self.PackInstance:FindFirstChild(CropName)
+    local CropAmount = self.Player.Calculations:Get({"Crops",CropName})
 
     if not Visuals then
         return
     end
 
+    local Capacity = self.Settings.Capacity
     local AllObjects = Visuals:GetChildren()
 
+    local HowMuchFilled = Capacity / CropAmount
+    local CropsAmountToMakeVisible = #AllObjects / HowMuchFilled]]
 end
 
 function Backpack:GetInfo()

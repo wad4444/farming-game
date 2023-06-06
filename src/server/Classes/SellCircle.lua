@@ -97,8 +97,6 @@ function SellCircle:Initialize()
             table.remove(self.Cooldowns, table.find(self.Cooldowns, Player))
         end)
 
-        table.insert(self.CurrentlyAwaiting, Player)
-
         local PlayerWrap = PlayerWrap.get(Player)
 
         local Table, Value = self:FindOnPath(
@@ -117,7 +115,10 @@ function SellCircle:Initialize()
             return
         end
 
+        table.insert(self.CurrentlyAwaiting, Player)
+
         local Result = RequestSelling:InvokeClient(Player, self.Settings, Currency1)
+
         table.remove(self.CurrentlyAwaiting, table.find(self.CurrentlyAwaiting, Player))
 
         if not Result then
