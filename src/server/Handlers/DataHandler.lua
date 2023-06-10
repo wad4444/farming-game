@@ -3,18 +3,21 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Players = game:GetService("Players")
 
 local ServerLibs = ServerScriptService.Server
+local Packages = ServerScriptService.Packages
+local ServerPackages = ServerScriptService.Packages
+local NonManagedPackages = ServerScriptService.NonManagedPackages
+
 local DataStructure = require(ServerLibs.Structures.PlayerData)
 local PlayerWrap = require(ServerLibs.Classes.PlayerWrap)
-local ReplicaService = require(ServerLibs.Libraries.ReplicaService)
+local ReplicaService = require(NonManagedPackages.ReplicaService)
 
-local Signal = require(ReplicatedStorage.Shared.Libraries.Signal)
+local Signal = require(ReplicatedStorage.Packages.Signal)
 
 local DataHandler = {}
 DataHandler.AutoDataPushDelay = 30
 DataHandler.OnLoadData = Signal.new()
 
-
-local ProfileService = require(ServerScriptService.Server.Libraries.ProfileService)
+local ProfileService = require(ServerPackages.ProfileService)
 local ProfileStore = ProfileService.GetProfileStore("PlayerDataStore8AWIDGUYHB", DataStructure.Structure)
 
 local function PlayerAdded(player)

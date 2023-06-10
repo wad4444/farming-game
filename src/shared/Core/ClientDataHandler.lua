@@ -7,8 +7,8 @@ local AddCallback = nil
 
 local Initialized = false
 
-local Libraries = ReplicatedStorage.Shared.Libraries
-local ReplicaController = require(Libraries.ReplicaController)
+local NonManagedPackages = ReplicatedStorage.NonManagedPackages
+local ReplicaController = require(NonManagedPackages.ReplicaController)
 
 local function AllocatePath(GlobalEntrancePoint, Path)
     local Splitted = Path

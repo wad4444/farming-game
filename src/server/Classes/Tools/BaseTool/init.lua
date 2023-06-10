@@ -14,7 +14,7 @@ local HitboxTracker = require(script.HitboxTracker)
 local Tool = {}
 Tool.__index = Tool
 
-local DefaultSettings = {
+local DefaultConfig = {
     Type = "Sickle1",
     SetupType = "Default",
     Animations = {
@@ -23,11 +23,11 @@ local DefaultSettings = {
     Cooldown = 1.5, 
     CustomName = nil,
     Upgrades = {},
-    TrackerSettings = HitboxTracker.GetSettings()
+    TrackerConfig = HitboxTracker.GetConfig()
 }
 
-function Tool.GetSettings()
-    return table.clone(DefaultSettings)
+function Tool.GetConfig()
+    return table.clone(DefaultConfig)
 end
 
 function Tool.new(...)
@@ -35,15 +35,15 @@ function Tool.new(...)
     return self:Constructor(...) or self
 end
 
-function Tool:Constructor(Player, ToolSettings)
+function Tool:Constructor(Player, ToolConfig)
     self.Player = Player
-    self.Settings = {}
+    self.Config = {}
     
-    for i,v in pairs(DefaultSettings) do
-        self.Settings[i] = ToolSettings[i] or v
+    for i,v in pairs(DefaultConfig) do
+        self.Config[i] = ToolConfig[i] or v
     end
 
-    self.HitboxTracker = HitboxTracker.new(self, self.Settings.TrackerSettings)
+    self.HitboxTracker = HitboxTracker.new(self, self.Config.TrackerConfig)
 end
 
 function Tool:Unload()
@@ -60,7 +60,7 @@ function Tool:StartDebounce()
     end
 
     self.Debounce = true
-    task.delay(self.Settings.Cooldown,function()
+    task.delay(self.Config.Cooldown,function()
         self.Debounce = false
     end)
 end
@@ -68,7 +68,7 @@ end
 function Tool:InitializeTool()
     local Character = self.Player.Instance.Character or self.Player.Instance.CharacterAdded:Wait()
 
-    local OriginalModel = ToolsPool:FindFirstChild(self.Settings.Type)
+    local OriginalModel = ToolsPool:FindFirstChild(self.Config.Type)
     local Backpack = self.Player.Instance:WaitForChild("Backpack")
 
     local NewTool = OriginalModel:Clone()
@@ -94,7 +94,7 @@ function Tool:InitializeBridge()
             end
             
             self:StartDebounce()
-            self.Player:PlayAnimation(self.Settings.Animations.Hit)
+            self.Player:PlayAnimation(self.Config.Animations.Hit)
 
             local FoundCrops = self.HitboxTracker:TrackCrops()
 
@@ -124,13 +124,13 @@ function Tool:InitializeBridge()
         end
     end
 
-    Remotes.SetupTool:FireClient(self.Player.Instance, self.Settings.SetupType, self.ToolInstance)
+    Remotes.SetupTool:FireClient(self.Player.Instance, self.Config.SetupType, self.ToolInstance)
 end
 
 function Tool:GetInfo()
     local Info = {}
 
-    for i,v in pairs(DefaultSettings) do
+    for i,v in pairs(DefaultConfig) do
         local IsDefault = self[i] == v
         Info[i] = not IsDefault and self[i] or nil
     end

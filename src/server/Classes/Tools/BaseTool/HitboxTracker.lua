@@ -2,7 +2,7 @@ local CollectionService = game:GetService("CollectionService")
 local HitboxTracker = {}
 HitboxTracker.__index = HitboxTracker
 
-local DefaultSettings = {
+local DefaultConfig = {
     HitboxInfo = {
         Start = Vector3.new(2,2,2),
         End = Vector3.new(2,2,2)
@@ -17,16 +17,16 @@ function HitboxTracker.new(...)
     return self:Constructor(...) or self
 end
 
-function HitboxTracker.GetSettings()
-    return table.clone(DefaultSettings)
+function HitboxTracker.GetConfig()
+    return table.clone(DefaultConfig)
 end
 
-function HitboxTracker:Constructor(Tool, Settings)
+function HitboxTracker:Constructor(Tool, Config)
     self.Tool = Tool
-    self.Settings = {}
+    self.Config = {}
 
-    for i,v in pairs(DefaultSettings) do
-        self.Settings[i] = Settings[i] or v
+    for i,v in pairs(DefaultConfig) do
+        self.Config[i] = Config[i] or v
     end
 end
 
@@ -39,8 +39,8 @@ function HitboxTracker:Track()
     end
 
     local RootPartCFrame = Character.PrimaryPart.CFrame
-    local Center = (RootPartCFrame + RootPartCFrame.LookVector * self.Settings.CenterDistance).Position
-    local HitboxInfo = self.Settings.HitboxInfo
+    local Center = (RootPartCFrame + RootPartCFrame.LookVector * self.Config.CenterDistance).Position
+    local HitboxInfo = self.Config.HitboxInfo
 
     local HitboxRegion = Region3.new(Center - HitboxInfo.Start, Center + HitboxInfo.End)
 

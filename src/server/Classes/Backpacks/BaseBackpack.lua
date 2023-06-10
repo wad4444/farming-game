@@ -7,7 +7,7 @@ local PacksPool = Assets.Backpacks
 local Backpack = {}
 Backpack.__index = Backpack
 
-local DefaultSettings = {
+local DefaultConfig = {
     Type = "Backpack1",
     Upgrades = {},
     Capacity = 40
@@ -17,8 +17,8 @@ function RoundToWhole(Number)
     return math.floor(Number) + .5
 end
 
-function Backpack.GetSettings()
-    return table.clone(DefaultSettings)
+function Backpack.GetConfig()
+    return table.clone(DefaultConfig)
 end
 
 function Backpack.new(...)
@@ -26,12 +26,12 @@ function Backpack.new(...)
     return self:Constructor(...) or self
 end
 
-function Backpack:Constructor(Player, ToolSettings)
+function Backpack:Constructor(Player, ToolConfig)
     self.Player = Player
-    self.Settings = {}
+    self.Config = {}
     
-    for i,v in pairs(DefaultSettings) do
-        self.Settings[i] = ToolSettings[i] or v
+    for i,v in pairs(DefaultConfig) do
+        self.Config[i] = ToolConfig[i] or v
     end
 end
 
@@ -48,7 +48,7 @@ function Backpack:Initialize()
         self.PackInstance:Destroy()
     end
 
-    local OriginalModel = PacksPool:FindFirstChild(self.Settings.Type)
+    local OriginalModel = PacksPool:FindFirstChild(self.Config.Type)
     local Character = self.Player.Instance.Character or self.Player.Instance.CharacterAdded:Wait()
     local Humanoid = Character:WaitForChild("Humanoid")
 
@@ -71,7 +71,7 @@ function Backpack:CropAmountChanged(CropName, Amount)
         return
     end
 
-    local Capacity = self.Settings.Capacity
+    local Capacity = self.Config.Capacity
     local AllObjects = Visuals:GetChildren()
 
     local HowMuchFilled = Capacity / CropAmount
@@ -81,7 +81,7 @@ end
 function Backpack:GetInfo()
     local Info = {}
 
-    for i,v in pairs(DefaultSettings) do
+    for i,v in pairs(DefaultConfig) do
         local IsDefault = self[i] == v
         Info[i] = not IsDefault and self[i] or nil
     end

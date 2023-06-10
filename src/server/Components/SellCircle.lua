@@ -3,16 +3,17 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local Remotes = ReplicatedStorage.Remotes
-local RequestSelling = Remotes.RequestSelling
+local QuestionClient = Remotes.QuestionClient
 
 local Classes = ServerScriptService.Server.Classes
-local Components = require(ReplicatedStorage.Shared.Libraries.Components)
+local Packages = ReplicatedStorage.Packages
+local Component = require(Packages.Components)
 
 local PlayerWrap = require(Classes.PlayerWrap)
 
-local SellCircle = Components.new({Tag = "SellCircle"})
+local SellCircle = Component.new({Tag = "SellCircle"})
 
-local DefaultSettings = {
+local DefaultConfig = {
     Currency1 = {"Crops", "Wheat"},
     Currency2 = {"Coins"},
     ExchangeRate = 1,
@@ -51,12 +52,12 @@ end
 function SellCircle:Construct()
     self.PrimaryConnection = nil
 
-    self.Settings = {}
+    self.Config = {}
     self.Cooldowns = {}
     self.CurrentlyAwaiting = {}
 
-    for i,v in pairs(DefaultSettings) do
-        self.Settings[i] = self.Instance:GetAttribute(i) or v
+    for i,v in pairs(DefaultConfig) do
+        self.Config[i] = self.Instance:GetAttribute(i) or v
     end
 end
 
@@ -76,7 +77,7 @@ function SellCircle:Start()
 
         table.insert(self.Cooldowns, Player)
 
-        task.delay(self.Settings.Cooldown, function()
+        task.delay(self.Config.Cooldown, function()
             table.remove(self.Cooldowns, table.find(self.Cooldowns, Player))
         end)
 
@@ -84,12 +85,12 @@ function SellCircle:Start()
 
         local Table, Value = self:FindOnPath(
             PlayerWrap.Profile.Data, 
-            self.Settings.Currency1
+            self.Config.Currency1
         )
 
         local Table2, Value2 = self:FindOnPath(
             PlayerWrap.Profile.Data, 
-            self.Settings.Currency1
+            self.Config.Currency1
         )
 
         local Currency1 = Table[Value]
@@ -100,7 +101,15 @@ function SellCircle:Start()
 
         table.insert(self.CurrentlyAwaiting, Player)
 
-        local Result = RequestSelling:InvokeClient(Player, self.Settings, Currency1)
+        local Question do
+            local Currency1Name = self.Config.Currency1[#self.Config.Currency1]
+            local Currency2Name = self.Config.Currency2[#self.Config.Currency2]
+        
+            local SellsFor = Currency1 * self.Config.ExchangeRate
+            Question = "Do you want to sell "..Currency1.." "..Currency1Name.." for "..SellsFor.." "..Currency2Name
+        end
+
+        local Result = QuestionClient:InvokeClient(Player, Question)
 
         table.remove(self.CurrentlyAwaiting, table.find(self.CurrentlyAwaiting, Player))
 
@@ -108,14 +117,14 @@ function SellCircle:Start()
             return
         end
 
-        local ExchangesFor = Currency1 * self.Settings.ExchangeRate
+        local ExchangesFor = Currency1 * self.Config.ExchangeRate
         PlayerWrap.Calculations:Increment(
-            self.Settings.Currency2,
+            self.Config.Currency2,
             ExchangesFor
         )
 
         PlayerWrap.Calculations:Set(
-            self.Settings.Currency1,
+            self.Config.Currency1,
             0
         )
     end)

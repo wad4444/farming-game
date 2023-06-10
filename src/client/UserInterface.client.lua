@@ -5,8 +5,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local Packages = ReplicatedStorage:WaitForChild("Packages")
 
-local Roact = require(Shared.Libraries.Roact)
+local Roact = require(Packages.Roact)
 local CustomElements = require(Shared.UIComponents)
 local PopUps = require(Shared.Core.PopUps)
 
@@ -44,12 +45,6 @@ end
 
 Roact.mount(Roact.createElement(Interface), PlayerGui)
 
-Remotes.RequestSelling.OnClientInvoke = function(CirlceSettings, Currency1Amount, Currency2Amount)
-    local Currency1Name = CirlceSettings.Currency1[#CirlceSettings.Currency1]
-    local Currency2Name = CirlceSettings.Currency2[#CirlceSettings.Currency2]
-
-    local SellsFor = Currency1Amount * CirlceSettings.ExchangeRate
-    local Question = "Do you want to sell "..Currency1Amount.." "..Currency1Name.." for "..SellsFor.." "..Currency2Name
-
-    return PopUps.Question(Question)
+Remotes.QuestionClient.OnClientInvoke = function(Text)
+    return PopUps.Question(Text)
 end

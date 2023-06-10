@@ -1,10 +1,12 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local NonManagerPackages = ReplicatedStorage:WaitForChild("NonManagedPackages")
+local Packages = ReplicatedStorage:WaitForChild("Packages")
 local Assets = ReplicatedStorage:WaitForChild("Assets")
 
-local Roact = require(Shared.Libraries.Roact)
+local Roact = require(Packages.Roact)
 local ClientDataHandler = require(Shared.Core.ClientDataHandler)
-local UIParticles = require(Shared.Libraries.UIParticles)
+local UIParticles = require(NonManagerPackages.UIParticles)
 
 local UIComponents = script.Parent
 

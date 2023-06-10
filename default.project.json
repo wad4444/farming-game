@@ -6,12 +6,24 @@
     "ReplicatedStorage": {
       "Shared": {
         "$path": "src/shared"
+      },
+      "NonManagedPackages": {
+        "$path": "src/shared/nmPackages"
+      },
+      "Packages": {
+        "$path": "Packages"
       }
     },
 
     "ServerScriptService": {
       "Server": {
         "$path": "src/server"
+      },
+      "NonManagedPackages": {
+        "$path": "src/server/nmPackages"
+      },
+      "Packages": {
+        "$path": "ServerPackages"
       }
     },
 

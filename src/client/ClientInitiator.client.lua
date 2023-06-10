@@ -2,9 +2,10 @@ local IsLoaded = game:IsLoaded() or game.Loaded:Wait()
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage.Shared
+local NonManagedPackages = ReplicatedStorage.NonManagedPackages
 
 local DataHandler = require(Shared.Core.ClientDataHandler)
-local WindMaker = require(Shared.Libraries.WindMaker)
+local WindMaker = require(NonManagedPackages.WindMaker)
 
 require(Shared.Core.VisualEffectsHandler)
 

@@ -1,8 +1,8 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
-local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Packages = ReplicatedStorage:WaitForChild("Packages")
 
-local Roact = require(Shared.Libraries.Roact)
+local Roact = require(Packages.Roact)
 
 local UIComponents = script.Parent
 local CustomButton1 = require(UIComponents.CustomButton1)

@@ -1,8 +1,10 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Shared = ReplicatedStorage:WaitForChild("Shared")
 
-local Roact = require(Shared.Libraries.Roact)
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Packages = ReplicatedStorage:WaitForChild("Packages")
+
+local Roact = require(Packages.Roact)
 local UIComponents = require(Shared.UIComponents)
 
 local PopUps = {}

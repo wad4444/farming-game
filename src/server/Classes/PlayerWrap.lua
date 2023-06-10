@@ -1,12 +1,13 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 local Assets = ReplicatedStorage:WaitForChild("Assets")
 
 local Classes = script.Parent
-local Libraries = Classes.Parent.Libraries
+local NonManagedPackages = ServerScriptService.NonManagedPackages
 
 local Calculations = require(Classes.Calculations)
 local PurchaseHandler = require(Classes.PurchaseHandler)
-local ReplicaService = require(Libraries.ReplicaService)
+local ReplicaService = require(NonManagedPackages.ReplicaService)
 
 local PlayerProfileClassToken = ReplicaService.NewClassToken("PlayerProfile")
 
