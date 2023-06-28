@@ -66,6 +66,8 @@ function Tool:StartDebounce()
 end
 
 function Tool:InitializeTool()
+    print("Tool initialized")
+
     local Character = self.Player.Instance.Character or self.Player.Instance.CharacterAdded:Wait()
 
     local OriginalModel = ToolsPool:FindFirstChild(self.Config.Type)

@@ -109,7 +109,10 @@ function SellCircle:Start()
             Question = "Do you want to sell "..Currency1.." "..Currency1Name.." for "..SellsFor.." "..Currency2Name
         end
 
-        local Result = QuestionClient:InvokeClient(Player, Question)
+        local Result
+        pcall(function()
+            Result = QuestionClient:InvokeClient(Player, Question)
+        end)
 
         table.remove(self.CurrentlyAwaiting, table.find(self.CurrentlyAwaiting, Player))
 

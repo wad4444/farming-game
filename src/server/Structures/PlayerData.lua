@@ -1,22 +1,26 @@
 return {
     Structure = {
-        Tools = {
+        Items = {
             {
-                Type = "Sickle1",
-            }
-        },
-        Backpacks = {
+                Name = "Sickle1",
+                Core = "BaseTool",
+                Category = "Tools"
+            },
             {
-                Type = "Backpack1",
+                Name = "Backpack1",
+                Core = "BaseBackpack",
+                Category = "Backpacks",
                 Capacity = 9e9
-            }
+            },
         },
         Crops = {
             Wheat = 0,
             Carrots = 0
         },
-        EquippedTool = 1,
-        EquippedBackpack = 1,
+        Equipped = {
+            Tool = 1,
+            Backpack = 2
+        },
         Coins = 0
     }
 }

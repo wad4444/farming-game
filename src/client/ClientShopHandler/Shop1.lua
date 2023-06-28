@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Core = Shared.Core
@@ -9,12 +10,26 @@ local UIComponents = require(Shared.UIComponents)
 local Roact = require(Packages.Roact)
 local UIEffects = require(Core.UIEffects)
 
+function ToggleCharactersVisiblity(Toggled)
+    for i,v in pairs(Players:GetPlayers()) do
+        local Character = v.Character
+
+        if not Character then
+            continue
+        end
+
+        Character.Parent = Toggled and workspace or nil
+    end
+end
+
 return function(Shop, FinishedCallback)
     local Camera = game.Workspace.CurrentCamera
     Camera.CameraType = Enum.CameraType.Scriptable
 
     local Scriptable = Shop.Instance:WaitForChild("Scriptable")
     local DoorOffset = 5
+
+    ToggleCharactersVisiblity(false)
 
     local CameraPoints = {}
     for i,v in pairs(Scriptable:GetChildren()) do
@@ -72,6 +87,10 @@ return function(Shop, FinishedCallback)
     MoveDoor(Scriptable.Door2, Scriptable.Door2:GetPivot().RightVector)
 
     MoveCamera(CameraPoints[2])
+
+    task.wait(2)
+
+    ToggleCharactersVisiblity(true)
 
     if FinishedCallback then
         FinishedCallback()

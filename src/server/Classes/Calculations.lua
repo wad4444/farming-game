@@ -64,6 +64,24 @@ function Calculations:Increment(Path, IncrementBy, CanGoNegative)
     return true
 end
 
+function Calculations:CanIncrement(Path, IncrementBy, CanGoNegative)
+    local Table, Stat = self:FindOnPath(Path)
+
+    if Table and not Stat then
+        error("Cant increment on a table")
+    end
+
+    if CanGoNegative then
+        return true
+    end
+
+    if (Table[Stat] + IncrementBy) < 0 then
+        return
+    end
+
+    return true
+end
+
 function Calculations:Get(Path)
     local Table, Stat = self:FindOnPath(Path)
 

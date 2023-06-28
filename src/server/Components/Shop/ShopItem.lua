@@ -5,7 +5,10 @@ local InstanceToWrap = {}
 
 ShopItem.DefaultConfig = {
     Price = 100,
-    ItemName = "Sickle1",
+    Name = "Sickle1",
+    DisplayName = "Sickle1",
+    Currency = "Coins",
+    Category = "Tools"
 }
 
 function ShopItem.new(Instance, ...)

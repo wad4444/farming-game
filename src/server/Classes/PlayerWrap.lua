@@ -3,11 +3,11 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Assets = ReplicatedStorage:WaitForChild("Assets")
 
 local Classes = script.Parent
-local NonManagedPackages = ServerScriptService.NonManagedPackages
+local SharedPackages = ReplicatedStorage.Packages
 
 local Calculations = require(Classes.Calculations)
 local PurchaseHandler = require(Classes.PurchaseHandler)
-local ReplicaService = require(NonManagedPackages.ReplicaService)
+local ReplicaService = require(SharedPackages.Replica)
 
 local PlayerProfileClassToken = ReplicaService.NewClassToken("PlayerProfile")
 
@@ -54,7 +54,6 @@ function PlayerWrap:PlayAnimation(AnimationName)
     end
 
     local AnimationTrack = Animator:LoadAnimation(HitAnimation)
-
     AnimationTrack:Play()
 end
 
@@ -68,76 +67,100 @@ function PlayerWrap:Constructor(Instance, Profile)
         Data = Profile.Data
     })
 
-    local function ConvertToClass(FieldName, ClassName)
-        self[FieldName] = {}
+    self.Items = {}
 
-        local ClassModule = Classes:FindFirstChild(ClassName, true)
-        local Class = require(ClassModule)
+    for _, ItemInfo in pairs(Profile.Data.Items) do
+        local CoreName = ItemInfo.Core
 
-        for i,v in pairs(Profile.Data[FieldName]) do
-            local NewTool = Class.new(self, v)
-            table.insert(self[FieldName], NewTool)
+        if not CoreName then
+            continue
         end
-    end
 
-    ConvertToClass("Backpacks", "BaseBackpack")
-    ConvertToClass("Tools", "BaseTool")
+        local CoreClass = require(Classes:FindFirstChild(CoreName))
+
+        local Item = CoreClass.new(self, ItemInfo)
+        table.insert(self.Items, Item)
+    end
 
     self.Calculations = Calculations.new(self)
     self.PurchaseHandler = PurchaseHandler.new(self)
 end
 
 function PlayerWrap:GetEquippedBackpack()
-    return self.Backpacks[self.Profile.Data.EquippedBackpack]
+    return self.Backpacks[self.Profile.Data.Equipped.Backpack]
 end
 
 function PlayerWrap:GetEquippedTool()
-    return self.Tools[self.Profile.Data.EquippedTool]
+    return self.Tools[self.Profile.Data.Equipped.Tool]
 end
 
 function PlayerWrap:Initialize()
     local Profile = self.Profile
 
-    local function InitializeEquipped(Field, ListName)
-        local Index = Profile.Data[Field]
-        local IsIndexValid = #self[ListName] <= Index
+    local function InitializeEquipped(Field)
+        local Index = Profile.Data.Equipped[Field]
 
-        if not Index or not IsIndexValid then
-            return 1
+        if not Index then
+            return
         end
 
-        self[ListName][Index]:Initialize()
-    end
+        local Tool = self.Items[Index]
 
-    local WasEquipped = false
-
-    local function Equip()
-        WasEquipped = true
-
-        InitializeEquipped("EquippedTool", "Tools")
-        InitializeEquipped("EquippedBackpack", "Backpacks")
-    end
-
-    self.Instance.CharacterAdded:Connect(Equip)
-    task.delay(3,function()
-        if not WasEquipped then
-            Equip()
+        if not Tool then
+            return
         end
-    end)
+
+        Tool:Initialize()
+    end
+
+    if not self.Instance.Character then
+        self.Instance.CharacterAdded:Wait()
+    end
+
+    InitializeEquipped("Tool")
+    InitializeEquipped("Backpack")
 end
 
 function PlayerWrap:SyncWithProfile()
     local ProfileData = self.Profile.Data
 
-    local function ConvertFromClass(FieldName)
-        local Table = {}
-        for i,v in pairs(self[FieldName]) do
-            table.insert(Table, v:GetInfo())
+    local Table = {}
+    for i,v in pairs(self.Items) do
+        table.insert(Table, v:GetInfo())
+    end
+end
+
+function PlayerWrap:AddItem(Item)
+    table.insert(self.Items, Item)
+    self.Replica:SetValue({"Items", #self.Profile.Data.Items + 1}, Item:GetInfo())
+end
+
+function PlayerWrap:RemoveItem(Item)
+    local IsValid = table.find(self.Items, Item)
+    if not IsValid then
+        return "NotValid"
+    end
+
+    for i,v in pairs(self.Profile.Data.Equipped) do
+        if self.Items[v] == Item then
+            return "Equipped"
         end
     end
 
-    ProfileData.Tools = ConvertFromClass("Tools")
-    ProfileData.Backpacks = ConvertFromClass("Backpacks")
+    local EquippedBefore = {}
+    
+    for i,v in pairs(self.Profile.Data.Equipped) do
+        EquippedBefore[i] = self.Items[v]
+    end
+
+    table.remove(
+        self.Items,
+        table.find(self.Items, Item)
+    )
+
+    for i,v in pairs(self.Profile.Data.Equipped) do
+        self.Replica:SetValue({"Equipped", i}, table.find(self.Items, v))
+    end
 end
 
 function PlayerWrap:AutoDataPushAsync(Delay)

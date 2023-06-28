@@ -27,15 +27,19 @@ function CustomButton1:render()
 
         [Roact.Ref] = self.ButtonRef,
         [Roact.Event.MouseEnter] = function()
-            if not self.props.CanTween() then
-                return
+            if self.props.CanTween then
+                if not self.props.CanTween() then
+                    return
+                end
             end
             
             self:OnMouseEnter()
         end,
         [Roact.Event.MouseLeave] = function()
-            if not self.props.CanTween() then
-                return
+            if self.props.CanTween then
+                if not self.props.CanTween() then
+                    return
+                end
             end
 
             self:OnMouseLeave()

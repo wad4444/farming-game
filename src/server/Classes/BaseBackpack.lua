@@ -44,6 +44,8 @@ function Backpack:Unload()
 end
 
 function Backpack:Initialize()
+    print("Backpack Initialized")
+
     if self.PackInstance then
         self.PackInstance:Destroy()
     end
@@ -53,7 +55,6 @@ function Backpack:Initialize()
     local Humanoid = Character:WaitForChild("Humanoid")
 
     local NewPack = OriginalModel:Clone()
-    NewPack.Parent = Character
     Humanoid:AddAccessory(NewPack)
 
     self.PackInstance = NewPack

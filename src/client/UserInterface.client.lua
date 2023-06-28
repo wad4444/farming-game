@@ -39,7 +39,7 @@ function Interface:render()
             IconId = "rbxassetid://13588650780",
             Position = UDim2.fromScale(0.85,0.58),
             Path = {"Crops", "Wheat"}
-        }),
+        })
     })
 end
 

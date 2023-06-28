@@ -19,9 +19,6 @@
       "Server": {
         "$path": "src/server"
       },
-      "NonManagedPackages": {
-        "$path": "src/server/nmPackages"
-      },
       "Packages": {
         "$path": "ServerPackages"
       }
