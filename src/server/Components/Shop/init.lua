@@ -17,7 +17,6 @@ local PlayerWrap = require(Classes.PlayerWrap)
 local Configs = require(Structures.ShopConfigs)
 
 local Shop = Component.new({Tag = "Shop"})
-local ShopItem = require(script.ShopItem)
 
 local DefaultConfig = {
     Categories = {
@@ -37,7 +36,6 @@ function Shop:Construct()
     ShopIdToClassExample[Config.Id] = self
 
     self.Config = {}
-    self.Items = {}
     self.Cooldown = {}
     self.CurrentlyAwaiting = {}
     self.InShop = {}
@@ -53,33 +51,12 @@ function Shop:Construct()
     end
 
     self.Models = self.Instance:WaitForChild("Items")
-
-    for Category,Items in pairs(self.Config.Categories) do
-        for _,ItemConfig in pairs(Items) do
-            local ItemModel = self.Models:FindFirstChild(ItemConfig.Name)
-            
-            if not ItemModel then
-                warn("Could not find model for item '"..ItemConfig.Name.."'")
-                continue
-            end
-
-            ItemConfig.Category = Category
-
-            local NewShopItem = ShopItem.new(ItemModel, ItemConfig)
-            table.insert(self.Items, NewShopItem)
-        end
-    end
-
     self.Entrance = self.Instance.Entrance
 end
 
 function Shop:FindItem(Name, Category)
-    for i,v in pairs(self.Items) do
-        if v.Name ~= Name then
-            continue
-        end
-
-        if Category and v.Category ~= Category then
+    for i,v in pairs(self.Config.Categories[Category]) do
+        if v.ID ~= Name then
             continue
         end
 
@@ -142,21 +119,78 @@ end
 
 function Shop:ProcessAction(PlayerInstance, ActionName, ...)
     local Actions = {
-        Buy = function(ReceiptInfo)
-            local Item = self:FindItem(ReceiptInfo.ItemName)
+        Buy = function(RequestInfo)
+            if typeof(RequestInfo) ~= "table" then
+                return
+            end
+
+            if not RequestInfo.Category or not RequestInfo.Item then
+                return
+            end
+
+            if typeof(RequestInfo.Category) ~= "string" or typeof(RequestInfo.Item) ~= "string" then
+                return
+            end
+
+            local ShopItem = self:FindItem(RequestInfo.Item, RequestInfo.Category)
             local Player = PlayerWrap.get(PlayerInstance)
 
-            if not Player then
+            if not Player or not ShopItem then
+                return
+            end
+
+            if Player:HasItem(RequestInfo.Item) then
                 return
             end
 
             local Calculations = Player.Calculations
 
-            if not Calculations:CanIncrement(Item.Currency, -Item.Price) then
+            if not Calculations:CanIncrement({ShopItem.Currency}, -ShopItem.Price) then
                 return false
             end
 
-            Calculations:Increment(Item.Currency, -Item.Price)
+            Calculations:Increment({ShopItem.Currency}, -ShopItem.Price)
+            Player:AddItem(RequestInfo.Item)
+            Player:EquipItem(RequestInfo.Item)
+        end,
+        Equip = function(RequestInfo)
+            if typeof(RequestInfo) ~= "table" then
+                return
+            end
+
+            if not RequestInfo.Item or not RequestInfo.Category then
+                return
+            end
+
+            if typeof(RequestInfo.Item) ~= "string" or typeof(RequestInfo.Category) ~= "string" then
+                return
+            end
+
+            local ShopItem = self:FindItem(RequestInfo.Item, RequestInfo.Category)
+            local Player = PlayerWrap.get(PlayerInstance)
+
+            if not ShopItem or not Player then
+                return
+            end
+
+            if not Player:HasItem(RequestInfo.Item) then
+                return
+            end
+
+            for i,v in pairs(Player.Equipped) do
+                if v.ID == RequestInfo.Item then
+                    return
+                end
+            end
+
+            Player:EquipItem(RequestInfo.Item)
+        end,
+        Close = function()
+            local Index = table.find(self.InShop, PlayerInstance)
+
+            if Index then
+                table.remove(self.InShop, Index)
+            end
         end
     }
 
@@ -167,7 +201,7 @@ function Shop:ProcessAction(PlayerInstance, ActionName, ...)
 end
 
 ShopBridge.OnServerInvoke = function(Player, ShopName, ...)
-    local ShopInstance =ShopIdToClassExample[ShopName]
+    local ShopInstance = ShopIdToClassExample[ShopName]
 
     if not ShopInstance then
         return

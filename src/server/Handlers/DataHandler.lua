@@ -16,7 +16,7 @@ DataHandler.AutoDataPushDelay = 30
 DataHandler.OnLoadData = Signal.new()
 
 local ProfileService = require(ServerPackages.ProfileService)
-local ProfileStore = ProfileService.GetProfileStore("im doing so much stressin :<", DataStructure.Structure)
+local ProfileStore = ProfileService.GetProfileStore("im doing so much stressin :<<", DataStructure.Structure)
 
 local function PlayerAdded(player)
     local Profile = ProfileStore:LoadProfileAsync(tostring(player.UserId))
@@ -49,8 +49,6 @@ local function SaveData(player: Player)
     end
 
     local Profile = Wrap.Profile
-
-    Wrap:SyncWithProfile()
     Profile:Release()
 end
 

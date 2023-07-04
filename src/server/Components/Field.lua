@@ -1,7 +1,6 @@
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
-local TweenService = game:GetService("TweenService")
 
 local ServerModules = ServerScriptService.Server
 
@@ -10,6 +9,7 @@ local Remotes = ReplicatedStorage.Remotes
 local Packages = ReplicatedStorage.Packages
 
 local Component = require(Packages.Components)
+local Notification = Remotes.Notification
 
 local Classes = ServerModules.Classes
 local PlayerWrap = require(Classes.PlayerWrap)
@@ -114,6 +114,8 @@ function Field:BreakCrops(Player, Crops)
         )
 
         if Difference <= 0 then
+            Notification:FireClient(Player.Instance, "Your backpack is full! To continue farming proceed to sell your crops")
+
             return
         end
 

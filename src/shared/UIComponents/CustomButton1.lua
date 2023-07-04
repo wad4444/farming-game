@@ -2,6 +2,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local Packages = ReplicatedStorage:WaitForChild("Packages")
 
+local Core = ReplicatedStorage:WaitForChild("Shared").Core 
+local UIEffects = require(Core.UIEffects)
+
 local Roact = require(Packages.Roact)
 
 local CustomButton1 = Roact.Component:extend("CustomButton1")
@@ -12,6 +15,23 @@ function CustomButton1:init()
 end
 
 function CustomButton1:render()
+    local ChildrenTable = {
+        UICorner = Roact.createElement("UICorner",{
+            CornerRadius = UDim.new(1,0)
+        }),
+        UIStroke = Roact.createElement("UIStroke",{
+            Color = self.props.StrokeColor or Color3.fromHex("c22a2a"),
+            Thickness = 3
+        }),
+        AspectRatio = self.props.AspectRatio and Roact.createElement("UIAspectRatioConstraint", {
+            AspectRatio = self.props.AspectRatio
+        }),
+    }
+
+    for i,v in pairs(self.props[Roact.Children] or {}) do
+        ChildrenTable[i] = v
+    end
+
     local NewButton = Roact.createElement("TextButton",{
         Name = self.props.Name,
         TextScaled = true,
@@ -21,6 +41,7 @@ function CustomButton1:render()
         AutoButtonColor = false,
         Text = self.props.Text,
         Font = self.props.Font or Enum.Font.FredokaOne,
+        ZIndex = self.props.ZIndex,
         
         Position = self.props.Position,
         Size = self.props.Size,
@@ -44,19 +65,11 @@ function CustomButton1:render()
 
             self:OnMouseLeave()
         end,
-        [Roact.Event.MouseButton1Down] = self.props.Callback
-    }, {
-        UICorner = Roact.createElement("UICorner",{
-            CornerRadius = UDim.new(1,0)
-        }),
-        UIStroke = Roact.createElement("UIStroke",{
-            Color = self.props.StrokeColor or Color3.fromHex("c22a2a"),
-            Thickness = 3
-        }),
-        AspectRatio = self.props.AspectRatio and Roact.createElement("UIAspectRatioConstraint", {
-            AspectRatio = self.props.AspectRatio
-        }),
-    })
+        [Roact.Event.MouseButton1Down] = function()
+            UIEffects.Click()
+        end,
+        [Roact.Event.MouseButton1Click] = self.props.Callback
+    }, ChildrenTable)
 
     return NewButton
 end

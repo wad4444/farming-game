@@ -113,7 +113,7 @@ end
 function StatBar:didMount()
     self.IsActive = true
 
-    ClientDataHandler.ChangeBind(self.props.Path, function(NewValue)
+    ClientDataHandler.Bind(self.props.Path, function(NewValue)
         if not self.IsActive then
             return
         end

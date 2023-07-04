@@ -15,14 +15,12 @@ local Tool = {}
 Tool.__index = Tool
 
 local DefaultConfig = {
-    Type = "Sickle1",
+    ID = "Sickle1",
     SetupType = "Default",
     Animations = {
         Hit = "SickleHit"
     },
     Cooldown = 1.5, 
-    CustomName = nil,
-    Upgrades = {},
     TrackerConfig = HitboxTracker.GetConfig()
 }
 
@@ -66,11 +64,9 @@ function Tool:StartDebounce()
 end
 
 function Tool:InitializeTool()
-    print("Tool initialized")
-
     local Character = self.Player.Instance.Character or self.Player.Instance.CharacterAdded:Wait()
 
-    local OriginalModel = ToolsPool:FindFirstChild(self.Config.Type)
+    local OriginalModel = ToolsPool:FindFirstChild(self.Config.ID)
     local Backpack = self.Player.Instance:WaitForChild("Backpack")
 
     local NewTool = OriginalModel:Clone()

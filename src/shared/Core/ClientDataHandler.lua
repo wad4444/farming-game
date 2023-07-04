@@ -39,7 +39,7 @@ local function AllocatePath(GlobalEntrancePoint, Path)
     return PathRecursive(GlobalEntrancePoint, 1)
 end
 
-function ClientHandler.ChangeBind(Path, Callback)
+function ClientHandler.Bind(Path, Callback)
     if not Initialized then
         Binds[Path] = Callback
         return

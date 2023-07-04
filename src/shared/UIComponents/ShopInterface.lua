@@ -8,10 +8,18 @@ local ShopInterface = Roact.Component:extend("ShopInterface")
 
 local UIComponents = script.Parent
 local CustomButton2 = require(UIComponents.CustomButton2)
+local CustomButton1 = require(UIComponents.CustomButton1)
 
 function ShopInterface:init()
     self.Callbacks = self.props.Callbacks
-    self.CurrentItemName, self.UpdateItemName = Roact.createBinding(self.props.StartingItemName or "N/A")
+    self:setState(self.props.StartingState or {
+        Item = {
+            DisplayName = "N/A",
+            ID = "N/A",
+            Price = "N/A"
+        },
+        Action = "Buy"
+    })
 
     if self.props.ReturnExample then
         self.props.ReturnExample(self)
@@ -51,7 +59,7 @@ function ShopInterface:render()
             Size = UDim2.fromScale(.17, .1),
             AspectRatio = 3.5,
             Squash = 8,
-            Text = "Buy",
+            Text = self.state.Action,
 
             Callback = self.Callbacks.BuyButton
         }),
@@ -64,11 +72,34 @@ function ShopInterface:render()
             Font = Enum.Font.FredokaOne,
             TextScaled = true,
             TextColor3 = Color3.fromHex("ffffff"),
-            Text = self.CurrentItemName
+            Text = self.state.Item.DisplayName or self.state.Item.ID
         }, {
             AspectRatioConstraint = Roact.createElement("UIAspectRatioConstraint", {
                 AspectRatio = 3.5
             })
+        }),
+        ItemPrice = Roact.createElement("TextLabel", {
+            Name = "ItemPrice",
+            Position = UDim2.fromScale(.5, .2),
+            Size = UDim2.fromScale(.17, .75),
+            AnchorPoint = Vector2.new(.5, .5),
+            BackgroundTransparency = 1,
+            Font = Enum.Font.FredokaOne,
+            TextScaled = true,
+            TextColor3 = Color3.fromHex("ffffff"),
+            Text = self.state.Item.Price.."$"
+        }, {
+            AspectRatioConstraint = Roact.createElement("UIAspectRatioConstraint", {
+                AspectRatio = 3.5
+            })
+        }),
+        CloseButton = Roact.createElement(CustomButton1, {
+            Size = UDim2.fromScale(.1, .1),
+            AspectRatio = 1,
+            Position = UDim2.fromScale(.9, .1),
+            Text = "X",
+
+            Callback = self.Callbacks.Close
         })
     })
 end

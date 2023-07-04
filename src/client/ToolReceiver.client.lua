@@ -2,7 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 
 local Types = {
-    Default = function(Tool : Tool)
+    Default = function(Tool)
         local Bridge = Tool:WaitForChild("Bridge")
         
         Tool.Activated:Connect(function()  

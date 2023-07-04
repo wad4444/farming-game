@@ -4,6 +4,7 @@ local Assets = ReplicatedStorage:WaitForChild("Assets")
 
 local Classes = script.Parent
 local SharedPackages = ReplicatedStorage.Packages
+local ItemsData = require(ReplicatedStorage.Shared.DataStructures.ItemsData)
 
 local Calculations = require(Classes.Calculations)
 local PurchaseHandler = require(Classes.PurchaseHandler)
@@ -67,19 +68,22 @@ function PlayerWrap:Constructor(Instance, Profile)
         Data = Profile.Data
     })
 
-    self.Items = {}
+    self.Equipped = {}
 
-    for _, ItemInfo in pairs(Profile.Data.Items) do
-        local CoreName = ItemInfo.Core
+    for i,v in pairs(Profile.Data.Equipped) do
+        local Config = ItemsData[v]
 
-        if not CoreName then
-            continue
+        local BaseClass = Classes:FindFirstChild(Config.Core)
+        BaseClass = BaseClass and require(BaseClass)
+
+        if not BaseClass then
+            return
         end
 
-        local CoreClass = require(Classes:FindFirstChild(CoreName))
+        local NewClass = BaseClass.new(self, Config)
+        NewClass:Initialize()
 
-        local Item = CoreClass.new(self, ItemInfo)
-        table.insert(self.Items, Item)
+        self.Equipped[i] = NewClass
     end
 
     self.Calculations = Calculations.new(self)
@@ -87,97 +91,69 @@ function PlayerWrap:Constructor(Instance, Profile)
 end
 
 function PlayerWrap:GetEquippedBackpack()
-    return self.Backpacks[self.Profile.Data.Equipped.Backpack]
+    return self.Equipped.Backpack
 end
 
 function PlayerWrap:GetEquippedTool()
-    return self.Tools[self.Profile.Data.Equipped.Tool]
+    return self.Equipped.Tool
 end
 
-function PlayerWrap:Initialize()
-    local Profile = self.Profile
-
-    local function InitializeEquipped(Field)
-        local Index = Profile.Data.Equipped[Field]
-
-        if not Index then
-            return
-        end
-
-        local Tool = self.Items[Index]
-
-        if not Tool then
-            return
-        end
-
-        Tool:Initialize()
+function PlayerWrap:AddItem(ItemID)
+    if not ItemsData[ItemID] then
+        return
     end
 
-    if not self.Instance.Character then
-        self.Instance.CharacterAdded:Wait()
-    end
-
-    InitializeEquipped("Tool")
-    InitializeEquipped("Backpack")
+    self.Replica:ArrayInsert({"Items"}, ItemID)
 end
 
-function PlayerWrap:SyncWithProfile()
-    local ProfileData = self.Profile.Data
+function PlayerWrap:RemoveItem(ItemID)
+    local ItemIndex = table.find(self.Profile.Data.Items, ItemID)
 
-    local Table = {}
-    for i,v in pairs(self.Items) do
-        table.insert(Table, v:GetInfo())
+    if not ItemIndex then
+        return
     end
+
+    self.Replica:ArrayRemove(self.Profile.Data.Items, ItemIndex)
 end
 
-function PlayerWrap:AddItem(Item)
-    table.insert(self.Items, Item)
-    self.Replica:SetValue({"Items", #self.Profile.Data.Items + 1}, Item:GetInfo())
+function PlayerWrap:HasItem(ItemID)
+    return table.find(self.Profile.Data.Items, ItemID) and true or false
 end
 
-function PlayerWrap:RemoveItem(Item)
-    local IsValid = table.find(self.Items, Item)
-    if not IsValid then
-        return "NotValid"
+function PlayerWrap:EquipItem(ItemID)
+    if not self:HasItem(ItemID) then
+        return
     end
 
-    for i,v in pairs(self.Profile.Data.Equipped) do
-        if self.Items[v] == Item then
-            return "Equipped"
-        end
-    end
-
-    local EquippedBefore = {}
+    local ItemInfo = ItemsData[ItemID]
     
-    for i,v in pairs(self.Profile.Data.Equipped) do
-        EquippedBefore[i] = self.Items[v]
+    if not ItemInfo then
+        return
     end
 
-    table.remove(
-        self.Items,
-        table.find(self.Items, Item)
-    )
+    local Type = ItemInfo.Type
+    local CoreName = ItemInfo.Core
+    ItemInfo.ID = ItemID
 
-    for i,v in pairs(self.Profile.Data.Equipped) do
-        self.Replica:SetValue({"Equipped", i}, table.find(self.Items, v))
+    local CurrentlyEquipped = self.Equipped[Type]
+    if CurrentlyEquipped.ID == ItemID then
+        return
     end
-end
 
-function PlayerWrap:AutoDataPushAsync(Delay)
-    self.StopPushing = false
+    CurrentlyEquipped:Unload()
 
-    local Coroutine = coroutine.wrap(function()
-        while not self.StopPushing do
-            task.wait(Delay)
-            self:SyncWithProfile()
-        end
-    end)
+    local CoreModule = Classes:FindFirstChild(CoreName)
+    CoreModule = CoreModule and require(CoreModule)
 
-    Coroutine()
-end
+    if not CoreModule then
+        return
+    end
 
-function PlayerWrap:StopPushing()
-    self.StopPushing = true
+    local NewClass = CoreModule.new(self, ItemInfo)
+    NewClass:Initialize()
+
+    self.Equipped[Type] = NewClass
+    self.Replica:ArraySet({"Equipped"}, Type, ItemID)
 end
 
 return PlayerWrap

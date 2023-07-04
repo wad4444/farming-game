@@ -28,6 +28,7 @@ end
 function Interface:render()
     return Roact.createElement("ScreenGui",{
         ResetOnSpawn = false,
+        IgnoreGuiInset = true,
         [Roact.Ref] = self.InterfaceRef
     },{
         CoinsBar = Roact.createElement(CustomElements.StatBar, {
@@ -39,6 +40,9 @@ function Interface:render()
             IconId = "rbxassetid://13588650780",
             Position = UDim2.fromScale(0.85,0.58),
             Path = {"Crops", "Wheat"}
+        }),
+        Inventory = Roact.createElement(CustomElements.InventoryInterface, {
+            ButtonPosition = UDim2.fromScale(.1, .1)
         })
     })
 end
@@ -48,3 +52,7 @@ Roact.mount(Roact.createElement(Interface), PlayerGui)
 Remotes.QuestionClient.OnClientInvoke = function(Text)
     return PopUps.Question(Text)
 end
+
+Remotes.Notification.OnClientEvent:Connect(function(Message)
+    PopUps.Notification(Message)
+end)

@@ -4,6 +4,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 
 local Remotes = ReplicatedStorage.Remotes
 local QuestionClient = Remotes.QuestionClient
+local CastEffect = Remotes.CastEffect
 
 local Classes = ServerScriptService.Server.Classes
 local Packages = ReplicatedStorage.Packages
@@ -119,6 +120,8 @@ function SellCircle:Start()
         if not Result then
             return
         end
+
+        CastEffect:FireClient(Player, "DropCoins", PotentialCharacter)
 
         local ExchangesFor = Currency1 * self.Config.ExchangeRate
         PlayerWrap.Calculations:Increment(

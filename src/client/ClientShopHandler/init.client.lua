@@ -13,8 +13,8 @@ local Roact = require(Packages.Roact)
 
 local ToolAnimationParams = {
     Speed = 2.5,
-    RotationSpeed = 2,
-    HeightDifference = .0325
+    RotationSpeed = 1.5,
+    HeightDifference = .0225
 }
 
 local OpenAnims = {}
@@ -28,6 +28,7 @@ end
 
 local CurrentlySelectedShop
 local CurrentIndex = 1
+local CurrentAction
 
 local Camera = game.Workspace.CurrentCamera
 local Player = Players.LocalPlayer
@@ -60,7 +61,7 @@ local ActionSwitch = {
 
         local function InitializeAnimation()
             for i,v in pairs(Category) do
-                local Model = Shop.Instance.Items:FindFirstChild(FirstItem.Name).ItemModel
+                local Model = Shop.Instance.Items:FindFirstChild(v.ID).ItemModel
 
                 task.spawn(function()
                     local CosAngle = 0
@@ -78,27 +79,54 @@ local ActionSwitch = {
                 end)
             end
 
-            local Model = Shop.Instance.Items:FindFirstChild(FirstItem.Name) do
+            local Model = Shop.Instance.Items:FindFirstChild(FirstItem.ID) do
                 Camera.CameraType = Enum.CameraType.Scriptable
                 Camera.CFrame = Model.CameraPoint.CFrame
             end
         end
 
+        local function UpdateAction()
+            local Item = Category[CurrentIndex]
+
+            for i,v in pairs(_G.ProfileData.Equipped) do
+                if v == Item.ID then
+                    CurrentAction = "Equipped"
+                    return
+                end
+            end
+
+            if table.find(_G.ProfileData.Items, Item.ID) then
+                CurrentAction = "Equip"
+                return
+            end
+
+            CurrentAction = "Buy"
+            return
+        end
+
         local function InitializeShop()
             CurrentIndex = 1
-
+ 
             InitializeAnimation()
+            UpdateAction()
 
+            local InterfaceTree
             local InterfaceExample
+
             local InterfaceElement = Roact.createElement(UIComponents.ShopInterface, {
                 Callbacks = {
                     LeftArrow = function()
                         CurrentIndex = CurrentIndex - 1 < 1 and #Category or CurrentIndex - 1
 
                         local Item = Category[CurrentIndex]
-                        local ItemInstance = Shop.Instance.Items:FindFirstChild(Item.Name)
+                        local ItemInstance = Shop.Instance.Items:FindFirstChild(Item.ID)
 
-                        InterfaceExample.UpdateItemName(Item.DisplayName or Item.Name)
+                        UpdateAction()
+
+                        InterfaceExample:setState({
+                            Item = Item,
+                            Action = CurrentAction
+                        })
 
                         MoveCamera(ItemInstance.CameraPoint)
                     end,
@@ -106,30 +134,58 @@ local ActionSwitch = {
                         CurrentIndex = CurrentIndex + 1 > #Category and 1 or CurrentIndex + 1
 
                         local Item = Category[CurrentIndex]
-                        local ItemInstance = Shop.Instance.Items:FindFirstChild(Item.Name)
+                        local ItemInstance = Shop.Instance.Items:FindFirstChild(Item.ID)
 
-                        InterfaceExample.UpdateItemName(Item.DisplayName or Item.Name)
+                        UpdateAction()
+
+                        InterfaceExample:setState({
+                            Item = Item,
+                            Action = CurrentAction
+                        })
 
                         MoveCamera(ItemInstance.CameraPoint)
                     end,
                     BuyButton = function()
+                        if CurrentAction == "Equipped" then
+                            return
+                        end
+
                         ShopBridge:InvokeServer(
                             CurrentlySelectedShop.Id,
-                            "Buy", 
+                            CurrentAction, 
                             {
-                                CategoryName = CategoryName,
-                                ItemName = Category[CurrentIndex].Name
+                                Category = CategoryName,
+                                Item = Category[CurrentIndex].ID
                             }
+                        )
+
+                        UpdateAction()
+                        InterfaceExample:setState({
+                            Item = InterfaceExample.state.Item,
+                            Action = CurrentAction
+                        })
+                    end,
+                    Close = function()
+                        OpenAnims.CloseShop(function()
+                            Roact.unmount(InterfaceTree)
+                        end)
+
+                        ShopBridge:InvokeServer(
+                            CurrentlySelectedShop.Id,
+                            "Close"
                         )
                     end
                 },
-                StartingItemName = FirstItem.Name,
+                StartingState = {
+                    Item = FirstItem,
+                    Action = CurrentAction
+                },
                 ReturnExample = function(PureExample)
                     InterfaceExample = PureExample
                 end
             })
 
-            Roact.mount(InterfaceElement, PlayerGui)
+            InterfaceTree = Roact.mount(InterfaceElement, PlayerGui)
         end
     
         PlayOpenAnimation(Shop, InitializeShop)

@@ -41,13 +41,18 @@ return function(Shop, FinishedCallback)
         CameraPoints[tonumber(Index)] = v
     end
 
-    local function MoveDoor(Door, Direction)
-        local EndCFrame = Door:GetPivot() + Direction * DoorOffset
+    local function MoveDoor(Door, Direction, ReturnDelay)
+        local StartCFrame = Door:GetPivot()
+        local EndCFrame = StartCFrame + Direction * DoorOffset
 
         local CFrameValue = Instance.new("CFrameValue", Door) do
-            CFrameValue.Value = Door:GetPivot()
+            CFrameValue.Value = StartCFrame
 
             CFrameValue.Changed:Connect(function(Value)
+                if not CFrameValue then
+                    return
+                end
+
                 Door:PivotTo(Value)
             end)
         end
@@ -58,6 +63,11 @@ return function(Shop, FinishedCallback)
         ), {Value = EndCFrame})
 
         Tween:Play()
+
+        task.delay(ReturnDelay or 3, function()
+            Door:PivotTo(StartCFrame)
+            CFrameValue:Destroy()
+        end)
     end
 
     local function SetCamera(Destination)
@@ -91,7 +101,7 @@ return function(Shop, FinishedCallback)
     task.wait(2)
 
     ToggleCharactersVisiblity(true)
-
+    
     if FinishedCallback then
         FinishedCallback()
     end

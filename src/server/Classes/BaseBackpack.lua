@@ -2,13 +2,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 local Assets = ReplicatedStorage:WaitForChild("Assets")
+
 local PacksPool = Assets.Backpacks
 
 local Backpack = {}
 Backpack.__index = Backpack
 
 local DefaultConfig = {
-    Type = "Backpack1",
+    ID = "Backpack1",
     Upgrades = {},
     Capacity = 40
 }
@@ -44,13 +45,11 @@ function Backpack:Unload()
 end
 
 function Backpack:Initialize()
-    print("Backpack Initialized")
-
     if self.PackInstance then
         self.PackInstance:Destroy()
     end
 
-    local OriginalModel = PacksPool:FindFirstChild(self.Config.Type)
+    local OriginalModel = PacksPool:FindFirstChild(self.Config.ID)
     local Character = self.Player.Instance.Character or self.Player.Instance.CharacterAdded:Wait()
     local Humanoid = Character:WaitForChild("Humanoid")
 
